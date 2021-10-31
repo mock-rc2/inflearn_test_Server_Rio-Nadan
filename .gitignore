@@ -107,4 +107,6 @@ package-lock.json
 
 secret.js
 
+log/
+
 .idea
