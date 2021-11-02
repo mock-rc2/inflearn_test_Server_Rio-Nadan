@@ -44,13 +44,14 @@ exports.createUser = async function (email, password, nickname) {
 
 
 // TODO: After 로그인 인증 방법 (JWT)
-exports.postSignIn = async function (email, password) {
+exports.loginUser = async function (userId, password) {
     try {
         // 이메일 여부 확인
-        const emailRows = await userProvider.emailCheck(email);
-        if (emailRows.length < 1) return errResponse(baseResponse.SIGNIN_EMAIL_WRONG);
+        const emailRows = await userProvider.emailCheck(userId);
+        console.log(emailRows);
+        if (emailRows.length < 1) return errResponse(baseResponse.SIGNIN_USER_INFO_WRONG);
 
-        const selectEmail = emailRows[0].email
+        const selectEmail = emailRows[0].EMAIL;
 
         // 비밀번호 확인
         const hashedPassword = await crypto
@@ -59,40 +60,57 @@ exports.postSignIn = async function (email, password) {
             .digest("hex");
 
         const selectUserPasswordParams = [selectEmail, hashedPassword];
-        const passwordRows = await userProvider.passwordCheck(selectUserPasswordParams);
+        const userInfoRows = await userProvider.passwordCheck(selectUserPasswordParams);
 
-        if (passwordRows[0].password !== hashedPassword) {
-            return errResponse(baseResponse.SIGNIN_PASSWORD_WRONG);
+        console.log("password: ",hashedPassword);
+
+        if (userInfoRows[0].PASSWORD !== hashedPassword) {
+            return errResponse(baseResponse.SIGNIN_USER_INFO_WRONG);
         }
-
-        // 계정 상태 확인
-        const userInfoRows = await userProvider.accountCheck(email);
 
         if (userInfoRows[0].status === "INACTIVE") {
             return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
-        } else if (userInfoRows[0].status === "DELETED") {
+        } else if (userInfoRows[0].status === "DELETE") {
             return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
         }
 
-        console.log(userInfoRows[0].id) // DB의 userId
+        console.log("id: ", userInfoRows[0].id) // DB의 userId
 
         //토큰 생성 Service
         let token = await jwt.sign(
             {
-                userId: userInfoRows[0].id,
+                userId: userInfoRows[0].USER_ID,
+                message: "login",
             }, // 토큰의 내용(payload)
             secret_config.jwtsecret, // 비밀키
             {
-                expiresIn: "365d",
+                expiresIn: "6h",
                 subject: "userInfo",
             } // 유효 기간 365일
         );
 
-        return response(baseResponse.SUCCESS, {'userId': userInfoRows[0].id, 'jwt': token});
+        //토큰 생성 Service
+        let refreshToken = await jwt.sign(
+            {
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "30d",
+                issuer: "rio",
+            } // 유효 기간 30일
+        );
+
+        connection = await pool.getConnection(async (conn) => conn);
+
+        const refreshTokenInsertResult = await userDao.insertRefreshToken(connection, refreshToken, userInfoRows[0].USER_ID);
+
+        connection.release();
+
+        return response(baseResponse.SUCCESS("로그인을 성공하였습니다."), {'userId': userInfoRows[0].USER_IO, 'jwt': token, 'refreshToken': refreshToken});
 
     } catch (err) {
         logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
-        return errResponse(baseResponse.DB_ERROR);
+        return errResponse(baseResponse.SERVER_ERROR);
     }
 };
 

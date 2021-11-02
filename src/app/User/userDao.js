@@ -11,9 +11,9 @@ async function selectUser(connection) {
 // 이메일로 회원 조회
 async function selectUserEmail(connection, email) {
   const selectUserEmailQuery = `
-                SELECT email, nickname 
-                FROM UserInfo 
-                WHERE email = ?;
+                SELECT EMAIL, USER_ID
+                FROM USERS 
+                WHERE EMAIL = ?;
                 `;
   const [emailRows] = await connection.query(selectUserEmailQuery, email);
   return emailRows;
@@ -22,9 +22,9 @@ async function selectUserEmail(connection, email) {
 // userId 회원 조회
 async function selectUserId(connection, userId) {
   const selectUserIdQuery = `
-                 SELECT id, email, nickname 
-                 FROM UserInfo 
-                 WHERE id = ?;
+                 SELECT USER_ID, EMAIL, NICK_NAME 
+                 FROM USERS 
+                 WHERE USER_ID = ?;
                  `;
   const [userRow] = await connection.query(selectUserIdQuery, userId);
   return userRow;
@@ -47,9 +47,9 @@ async function insertUserInfo(connection, insertUserInfoParams) {
 // 패스워드 체크
 async function selectUserPassword(connection, selectUserPasswordParams) {
   const selectUserPasswordQuery = `
-        SELECT email, nickname, password
-        FROM UserInfo 
-        WHERE email = ? AND password = ?;`;
+        SELECT USER_ID, EMAIL, PASSWORD, STATUS
+        FROM USERS 
+        WHERE EMAIL = ? AND PASSWORD = ?;`;
   const selectUserPasswordRow = await connection.query(
       selectUserPasswordQuery,
       selectUserPasswordParams
@@ -80,6 +80,17 @@ async function updateUserInfo(connection, id, nickname) {
   return updateUserRow[0];
 }
 
+async function insertRefreshToken(connection, token, userId) {
+  const insertTokenQuery = `
+    UPDATE USERS 
+      SET USER_REFRESH_TOKEN  = ? 
+    WHERE USER_ID = ?;
+  `;
+
+  const insertTokenRow = await connection.query(insertTokenQuery, [token, userId]);
+
+  return insertTokenRow;
+}
 
 module.exports = {
   selectUser,
@@ -89,4 +100,5 @@ module.exports = {
   selectUserPassword,
   selectUserAccount,
   updateUserInfo,
+  insertRefreshToken
 };
