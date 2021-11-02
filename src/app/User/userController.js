@@ -24,32 +24,34 @@ exports.getTest = async function (req, res) {
 exports.postUsers = async function (req, res) {
 
     /**
-     * Body: email, password, nickname
+     * Body: email, password
      */
-    const {email, password, nickname} = req.body;
+    const {email, password} = req.body;
 
     // 빈 값 체크
     if (!email)
-        return res.send(response(baseResponse.SIGNUP_EMAIL_EMPTY));
+        return res.send(response(baseResponse.SIGNIN_EMAIL_EMPTY("")));
 
     // 길이 체크
     if (email.length > 30)
-        return res.send(response(baseResponse.SIGNUP_EMAIL_LENGTH));
+        return res.send(response(baseResponse.SIGNIN_EMAIL_LENGTH));
 
     // 형식 체크 (by 정규표현식)
     if (!regexEmail.test(email))
-        return res.send(response(baseResponse.SIGNUP_EMAIL_ERROR_TYPE));
+        return res.send(response(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
 
+    // 제가 지금 한거 입니다. 넵!
+    if(password.length === 0)
+        return res.send(response(baseResponse.SIGNIN_PASSWORD_EMPTY));
     // 기타 등등 - 추가하기
 
 
     const signUpResponse = await userService.createUser(
         email,
-        password,
-        nickname
+        password
     );
 
-    return res.send(signUpResponse);
+    return res.send(signUpResponse,response(baseResponse.SUCCESS("회원가입에 성공하였습니다.")));
 };
 
 /**
