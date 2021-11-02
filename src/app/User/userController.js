@@ -51,7 +51,7 @@ exports.postUsers = async function (req, res) {
         password
     );
 
-    return res.send(signUpResponse,response(baseResponse.SUCCESS("회원가입에 성공하였습니다.")));
+    return res.send(signUpResponse);
 };
 
 /**

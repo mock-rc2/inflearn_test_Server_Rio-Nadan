@@ -33,7 +33,7 @@ exports.createUser = async function (email, password) {
         const userIdResult = await userDao.insertUserInfo(connection, insertUserInfoParams);
         console.log(`추가된 회원 : ${userIdResult[0].insertId}`)
         connection.release();
-        return response(baseResponse.SUCCESS);
+        return response(baseResponse.SUCCESS("회원가입 성공입니다."));
 
 
     } catch (err) {
