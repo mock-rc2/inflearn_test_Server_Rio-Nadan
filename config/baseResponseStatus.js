@@ -47,7 +47,7 @@ module.exports = {
     TOKEN_EXPIRED_FAIL:{ "isSuccess": false, "code": 3007, "message":"JWT 토큰 유효기간 만료"},
     TOKEN_EMPTY:{ "isSuccess": false, "code": 3007, "message":"JWT 토큰이 비어있습니다."},
     UPDATE_EMAIL_FAIL:{ "isSuccess": false, "code": 3008, "message":"이메일 업데이트에 실패했습니다."},
-    UPDATE_NICK_NAME_FAIL:{ "isSuccess": false, "code": 3009, "message":"닉네임 업데이트에 실패했습니다."},
+    UPDATE_PROFILE_FAIL:{ "isSuccess": false, "code": 3009, "message":"프로필 업데이트에 실패했습니다."},
     SIGNUP_USER_FAIL: { "isSuccess": false, "code": 3010, "message":"회원가입에 실패했습니다."},
     INSERT_REFRESH_TOKEN_FAIL: { "isSuccess": false, "code": 3011, "message":"refresh 토큰 동기화에 실패했습니다."},
     UPDATE_PHONE_NUMBER_FAIL: { "isSuccess": false, "code": 3012, "message":"휴대폰 번호 저장이 실패했습니다."},

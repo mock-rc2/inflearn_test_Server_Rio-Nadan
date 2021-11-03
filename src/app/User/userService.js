@@ -127,13 +127,13 @@ exports.editProfile = async function (id, nickName, userIntro) {
     const connection = await pool.getConnection(async (conn) => conn);
 
     try {
-        console.log(id)
+
         const editProfileResult = await userDao.updateUserProfile(connection, id, nickName, userIntro);
 
         //업데이트 검증
         if(editProfileResult[0].affectedRows == 0) {
             await connection.rollback();
-            return response(errResponse(baseResponse.UPDATE_NICK_NAME_FAIL));
+            return response(errResponse(baseResponse.UPDATE_PROFILE_FAIL));
         }
 
         return response(baseResponse.SUCCESS("프로필 변경에 성공하였습니다."));
