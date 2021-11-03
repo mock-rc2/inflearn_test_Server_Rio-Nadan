@@ -1,9 +1,12 @@
 const express = require('express');
 const compression = require('compression');
 const methodOverride = require('method-override');
+const bodyParser = require('body-parser');
 var cors = require('cors');
 module.exports = function () {
     const app = express();
+
+    app.use(bodyParser.json());
 
     app.use(compression());
 
@@ -14,6 +17,8 @@ module.exports = function () {
     app.use(methodOverride());
 
     app.use(cors());
+
+
     // app.use(express.static(process.cwd() + '/public'));
 
     /* App (Android, iOS) */

@@ -3,6 +3,7 @@ const userProvider = require("../../app/User/userProvider");
 const userService = require("../../app/User/userService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
+const requestHandler = require("../../../config/requestHandler")
 
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
@@ -53,6 +54,49 @@ exports.postUsers = async function (req, res) {
 
     return res.send(signUpResponse);
 };
+// CORS 오류로 인한 보류
+/*exports.oauthKakaoLogin = async function (req,res) {
+
+    const accessToken = req.headers['access-token'];
+
+    const getOptions = {
+        header: {
+            'Content-Type': 'appication/x-www-form-urlencoded;charset=utf-8',
+            'Authorization': 'Bearer ' + accessToken
+        }
+    };
+
+    const getRes = await requestHandler.requestUserEmail(getOptions);
+
+    console.log(getRes);
+    let userInfo = JSON.parse(getRes.body);
+
+    let email = userInfo.kakao_account.email;
+    let name = userInfo.kakao_account.name;
+
+    // 빈 값 체크
+    if (!email)
+        return res.send(response(baseResponse.SIGNUP_EMAIL_EMPTY));
+
+    // 길이 체크
+    if (email.length > 30)
+        return res.send(response(baseResponse.SIGNUP_EMAIL_LENGTH));
+
+    // 형식 체크 (by 정규표현식)
+    if (!regexEmail.test(email))
+        return res.send(response(baseResponse.SIGNUP_EMAIL_ERROR_TYPE));
+
+    const checkParam = await userProvider.emailCheck(email);
+
+    if (checkParam.length < 1) {
+        const signUpResponse = await userService.oauthCreateUser(email,name);
+
+        return res.send(signUpResponse);
+    }else{
+        const signInResponse = await userService.oauthSignIn(email);
+        return res.send(signInResponse);
+    }
+}*/
 
 /**
  * API Name : 유저 로그인 API

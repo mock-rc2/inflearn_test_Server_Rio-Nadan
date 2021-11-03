@@ -11,6 +11,11 @@ module.exports = function(app){
     // 유저 회원가입 API
     app.post('/inflearn/users/signup',user.postUsers);
 
+    // 소셜 로그인 API CORS 오류로 인한 보류
+    // app.get('/inflearn/users/oauth/login',user.oauthKakaoLogin);
+
+    // 강의 목록 API 브런치 따서 작업하면 됌
+
 };
 
 

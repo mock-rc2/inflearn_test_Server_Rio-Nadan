@@ -42,6 +42,27 @@ exports.createUser = async function (email, password) {
     }
 };
 
+/*
+exports.oauthCreateUser = async function(email,name){
+
+    try{
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const insertUserInfoParams = [email,name];
+
+        const userIdResult = await userDao.insertUserInfo(connection, insertUserInfoParams);
+        console.log(`추가된 회원 : ${userIdResult[0].insertId}`)
+        connection.release();
+        return response(baseResponse.SUCCESS("회원가입 성공입니다."));
+
+
+    } catch (err) {
+        logger.error(`App - createUser Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+
+}*/
+
 // TODO: After 로그인 인증 방법 (JWT)
 exports.loginUser = async function (userId, password) {
     try {
@@ -67,13 +88,13 @@ exports.loginUser = async function (userId, password) {
             return errResponse(baseResponse.SIGNIN_USER_INFO_WRONG);
         }
 
-        if (userInfoRows[0].status === "INACTIVE") {
+        if (userInfoRows[0].STATUS === "INACTIVE") {
             return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
-        } else if (userInfoRows[0].status === "DELETE") {
+        } else if (userInfoRows[0].STATUS === "DELETE") {
             return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
         }
 
-        console.log("id: ", userInfoRows[0].id) // DB의 userId
+        console.log("ID: ", userInfoRows[0].USER_ID) // DB의 userId
 
         //토큰 생성 Service
         let token = await jwt.sign(
@@ -99,19 +120,80 @@ exports.loginUser = async function (userId, password) {
             } // 유효 기간 30일
         );
 
-        connection = await pool.getConnection(async (conn) => conn);
+        const connection = await pool.getConnection(async (conn) => conn);
 
         const refreshTokenInsertResult = await userDao.insertRefreshToken(connection, refreshToken, userInfoRows[0].USER_ID);
 
         connection.release();
 
-        return response(baseResponse.SUCCESS("로그인을 성공하였습니다."), {'userId': userInfoRows[0].USER_IO, 'jwt': token, 'refreshToken': refreshToken});
+        return response(baseResponse.SUCCESS("로그인을 성공하였습니다."), {'userId': userInfoRows[0].USER_ID, 'jwt': token, 'refreshToken': refreshToken});
 
     } catch (err) {
         logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
         return errResponse(baseResponse.SERVER_ERROR);
     }
 };
+
+
+/*
+
+exports.oauthSignIn = async function(email){
+    try {
+        // 이메일 여부 확인
+        const userInfoRows = await userProvider.emailCheck(email);
+        console.log(userInfoRows);
+        if (userInfoRows.length < 1) return errResponse(baseResponse.SIGNIN_USER_INFO_WRONG);
+
+        const selectEmail = userInfoRows[0].EMAIL;
+
+
+        if (userInfoRows[0].STATUS === "INACTIVE") {
+            return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
+        } else if (userInfoRows[0].STATUS === "DELETE") {
+            return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
+        }
+
+        console.log("id: ", userInfoRows[0].USER_ID) // DB의 userId
+
+        //토큰 생성 Service
+        let token = await jwt.sign(
+            {
+                userId: userInfoRows[0].USER_ID,
+                message: "login",
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "6h",
+                subject: "userInfo",
+            } // 유효 기간 365일
+        );
+
+        //토큰 생성 Service
+        let refreshToken = await jwt.sign(
+            {
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "30d",
+                issuer: "rio",
+            } // 유효 기간 30일
+        );
+
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const refreshTokenInsertResult = await userDao.insertRefreshToken(connection, refreshToken, userInfoRows[0].USER_ID);
+
+        connection.release();
+
+        return response(baseResponse.SUCCESS("로그인을 성공하였습니다."), {'userId': userInfoRows[0].USER_ID, 'jwt': token, 'refreshToken': refreshToken});
+
+    } catch (err) {
+        logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    }
+}
+*/
+
 
 exports.editUser = async function (id, nickname) {
     try {
