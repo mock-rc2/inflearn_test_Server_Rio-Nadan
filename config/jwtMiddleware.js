@@ -4,7 +4,6 @@ const { response } = require("./response")
 const { errResponse } = require("./response")
 const baseResponse = require("./baseResponseStatus");
 
-
 const jwtMiddleware = (req, res, next) => {
     // read the token from header or url
     const token = req.headers['x-access-token'] || req.query.token;
@@ -25,6 +24,9 @@ const jwtMiddleware = (req, res, next) => {
 
     // if it has failed to verify, it will return an error message
     const onError = (error) => {
+        // jwt 유효 기간 만료
+        if(error.message=='jwt expired')  return res.send(errResponse(baseResponse.TOKEN_EXPIRED_FAIL));
+
         return res.send(errResponse(baseResponse.TOKEN_VERIFICATION_FAILURE))
     };
     // process the promise

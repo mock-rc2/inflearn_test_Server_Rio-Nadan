@@ -71,12 +71,12 @@ async function selectUserAccount(connection, email) {
   return selectUserAccountRow[0];
 }
 
-async function updateUserInfo(connection, id, nickname) {
+async function updateUserProfile(connection, id, nickName, userIntro) {
   const updateUserQuery = `
-  UPDATE UserInfo 
-  SET nickname = ?
-  WHERE id = ?;`;
-  const updateUserRow = await connection.query(updateUserQuery, [nickname, id]);
+  UPDATE USERS 
+  SET NICK_NAME = ?, INTRODUCE_MESSAGE = ?
+  WHERE  USER_ID = ?;`;
+  const updateUserRow = await connection.query(updateUserQuery, [nickName, userIntro, id]);
   return updateUserRow[0];
 }
 
@@ -92,6 +92,41 @@ async function insertRefreshToken(connection, token, userId) {
   return insertTokenRow;
 }
 
+async function updateUserEmail(connection, id, email) {
+  const updateUserEmailQuery = `
+    UPDATE USERS
+    SET EMAIL = ?
+    WHERE USER_ID = ?;
+  `;
+
+  const resultRows = await connection.query(updateUserEmailQuery, [email, id]);
+
+  return resultRows;
+}
+
+async function updateUserPhoneNumber(connection, id, phoneNumber) {
+  const updateUserPhoneNumQuery = `
+    UPDATE USERS
+    SET PHONE_NUMBER = ?
+    WHERE USER_ID = ?;
+  `;
+
+  const resultRow = await connection.query(updateUserPhoneNumQuery, [phoneNumber, id]);
+
+  return resultRow;
+}
+
+async function selectUserPhoneNumber(connection, phoneNumber) {
+  const selectUserPhoneNumber = `
+    SELECT PHONE_NUMBER
+    FROM USERS
+    WHERE PHONE_NUMBER = ?;
+  `;
+
+  const [resultRow] = await connection.query(selectUserPhoneNumber,phoneNumber);
+
+  return resultRow;
+}
 module.exports = {
   selectUser,
   selectUserEmail,
@@ -99,6 +134,9 @@ module.exports = {
   insertUserInfo,
   selectUserPassword,
   selectUserAccount,
-  updateUserInfo,
-  insertRefreshToken
+  updateUserProfile,
+  insertRefreshToken,
+  updateUserEmail,
+  updateUserPhoneNumber,
+  selectUserPhoneNumber
 };

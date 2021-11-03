@@ -14,6 +14,8 @@ const {connect} = require("http2");
 // Service: Create, Update, Delete 비즈니스 로직 처리
 
 exports.createUser = async function (email, password) {
+    const connection = await pool.getConnection(async (conn) => conn);
+
     try {
         // 이메일 중복 확인
         const emailRows = await userProvider.emailCheck(email);
@@ -28,22 +30,29 @@ exports.createUser = async function (email, password) {
 
         const insertUserInfoParams = [email, hashedPassword];
 
-        const connection = await pool.getConnection(async (conn) => conn);
-
         const userIdResult = await userDao.insertUserInfo(connection, insertUserInfoParams);
-        console.log(`추가된 회원 : ${userIdResult[0].insertId}`)
-        connection.release();
+
+        // 데이터 INSERT 검증
+        if(userIdResult[0].affectedRows == 0) {
+            await connection.rollback();
+            return errResponse(baseResponse.SIGNUP_USER_FAIL);
+        }
+
         return response(baseResponse.SUCCESS("회원가입 성공입니다."));
 
 
     } catch (err) {
         logger.error(`App - createUser Service error\n: ${err.message}`);
-        return errResponse(baseResponse.DB_ERROR);
+        return errResponse(baseResponse.SERVER_ERROR);
+    } finally {
+        connection.release();
     }
 };
 
 // TODO: After 로그인 인증 방법 (JWT)
 exports.loginUser = async function (userId, password) {
+    connection = await pool.getConnection(async (conn) => conn);
+
     try {
         // 이메일 여부 확인
         const emailRows = await userProvider.emailCheck(userId);
@@ -60,8 +69,6 @@ exports.loginUser = async function (userId, password) {
 
         const selectUserPasswordParams = [selectEmail, hashedPassword];
         const userInfoRows = await userProvider.passwordCheck(selectUserPasswordParams);
-
-        console.log("password: ",hashedPassword);
 
         if (userInfoRows[0].PASSWORD !== hashedPassword) {
             return errResponse(baseResponse.SIGNIN_USER_INFO_WRONG);
@@ -99,31 +106,90 @@ exports.loginUser = async function (userId, password) {
             } // 유효 기간 30일
         );
 
-        connection = await pool.getConnection(async (conn) => conn);
-
         const refreshTokenInsertResult = await userDao.insertRefreshToken(connection, refreshToken, userInfoRows[0].USER_ID);
 
-        connection.release();
+        if(refreshTokenInsertResult[0].affectedRows == 0){
+            await connection.rollback();
+            return errResponse(baseResponse.INSERT_REFRESH_TOKEN_FAIL);
+        }
 
         return response(baseResponse.SUCCESS("로그인을 성공하였습니다."), {'userId': userInfoRows[0].USER_IO, 'jwt': token, 'refreshToken': refreshToken});
 
     } catch (err) {
         logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
         return errResponse(baseResponse.SERVER_ERROR);
+    } finally {
+        connection.release();
     }
 };
 
-exports.editUser = async function (id, nickname) {
+exports.editProfile = async function (id, nickName, userIntro) {
+    const connection = await pool.getConnection(async (conn) => conn);
+
     try {
         console.log(id)
-        const connection = await pool.getConnection(async (conn) => conn);
-        const editUserResult = await userDao.updateUserInfo(connection, id, nickname)
-        connection.release();
+        const editProfileResult = await userDao.updateUserProfile(connection, id, nickName, userIntro);
 
-        return response(baseResponse.SUCCESS);
+        //업데이트 검증
+        if(editProfileResult[0].affectedRows == 0) {
+            await connection.rollback();
+            return response(errResponse(baseResponse.UPDATE_NICK_NAME_FAIL));
+        }
 
+        return response(baseResponse.SUCCESS("프로필 변경에 성공하였습니다."));
     } catch (err) {
-        logger.error(`App - editUser Service error\n: ${err.message}`);
-        return errResponse(baseResponse.DB_ERROR);
+        logger.error(`App - editUserProfile Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    }finally {
+        connection.release();
+    }
+}
+
+exports.editEmail = async function (id, email) {
+    const connection = await pool.getConnection(async (conn) => conn);
+
+    try{
+        const emailCheckRow = userProvider.emailCheck(email);
+        if(emailCheckRow.length > 0) return response(errResponse(baseResponse.SIGNUP_REDUNDANT_EMAIL));
+
+        const editEmailResult = await userDao.updateUserEmail(connection, id, email);
+
+        // 업데이트 검증
+        if(editEmailResult[0].affectedRows == 0) {
+            await connection.rollback();
+            return response(errResponse(baseResponse.UPDATE_EMAIL_FAIL));
+        }
+
+        return response(baseResponse.SUCCESS("이메일 변경에 성공하였습니다."));
+    } catch (err) {
+        logger.error(`App - editUserEmail Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+exports.editPhoneNumber = async function (id, phoneNumber) {
+    const connection = await pool.getConnection(async (conn) => conn);
+
+    try{
+        const phoneNumberCheckRow = userProvider.phoneNumberCheck(phoneNumber);
+
+        if(phoneNumberCheckRow.length > 0) return errResponse(baseResponse.USER_REDUNDANT_PHONE_NUMBER);
+
+        const editPhoneNumResult = await userDao.updateUserPhoneNumber(connection, id, phoneNumber);
+
+        // 업데이트 검증
+        if(editPhoneNumResult[0].affectedRows == 0) {
+            await connection.rollback();
+            return response(errResponse(baseResponse.UPDATE_PHONE_NUMBER_FAIL));
+        }
+
+        return response(baseResponse.SUCCESS("휴대폰 번호 변경에 성공하였습니다."));
+    } catch (err) {
+        logger.error(`App - editUserEmail Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    } finally {
+        connection.release();
     }
 }

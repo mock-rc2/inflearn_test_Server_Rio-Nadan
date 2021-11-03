@@ -78,6 +78,47 @@ exports.postLoginUsers = async function (req, res) {
     return res.send(userLoginResult);
 };
 
+exports.editProfile = async function (req, res) {
+    const token = req.verifiedToken;
+
+    const userId = token.userId;
+
+    const {nickName, userIntro} = req.body;
+
+    if(!nickName) return res.send(errResponse(baseResponse.USER_NICK_NAME_EMPTY));
+
+    const userEditProfileResult = await userService.editProfile(userId, nickName, userIntro);
+
+    return res.send(userEditProfileResult);
+};
+
+exports.editEmail = async function (req, res) {
+    const token = req.verifiedToken;
+
+    const id = token.userId;
+
+    const email = req.body.email;
+
+    if(!email) return res.send(errResponse(baseResponse.USER_USEREMAIL_EMPTY));
+
+    const userEditEmailResult = await userService.editEmail(id, email);
+
+    return res.send(userEditEmailResult);
+}
+
+exports.editPhoneNumber = async function (req, res) {
+    const token = req.verifiedToken;
+
+    const id = token.userId;
+
+    const phoneNumber = req.body.phoneNumber;
+
+    if(!phoneNumber) return res.send(errResponse(baseResponse.USER_PHONE_NUMBER_EMPTY));
+
+    const userEditPhoneResult = await userService.editPhoneNumber(id, phoneNumber);
+
+    return res.send(userEditPhoneResult);
+}
 
 /** JWT 토큰 검증 API
  * [GET] /app/auto-login

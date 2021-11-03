@@ -8,9 +8,15 @@ module.exports = function(app){
     // 유저 로그인 API
     app.post('/inflearn/users/login', user.postLoginUsers);
 
+
     // 유저 회원가입 API
     app.post('/inflearn/users/signup',user.postUsers);
 
+    app.patch('/inflearn/users/profile', jwtMiddleware, user.editProfile);
+
+    app.patch('/inflearn/users/email', jwtMiddleware, user.editEmail);
+
+    app.patch('/inflearn/users/phonenumber',jwtMiddleware, user.editPhoneNumber);
 };
 
 
