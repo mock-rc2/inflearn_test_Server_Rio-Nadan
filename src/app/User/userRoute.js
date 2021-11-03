@@ -17,6 +17,13 @@ module.exports = function(app){
     app.patch('/inflearn/users/email', jwtMiddleware, user.editEmail);
 
     app.patch('/inflearn/users/phonenumber',jwtMiddleware, user.editPhoneNumber);
+
+    // 소셜 로그인 API CORS 오류로 인한 보류
+    // app.get('/inflearn/users/oauth/login',user.oauthKakaoLogin);
+
+    // 강의 목록 API 브런치 따서 작업하면 됌
+
+
 };
 
 

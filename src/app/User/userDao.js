@@ -11,7 +11,7 @@ async function selectUser(connection) {
 // 이메일로 회원 조회
 async function selectUserEmail(connection, email) {
   const selectUserEmailQuery = `
-                SELECT EMAIL, USER_ID
+                SELECT EMAIL, USER_ID, STATUS
                 FROM USERS 
                 WHERE EMAIL = ?;
                 `;
