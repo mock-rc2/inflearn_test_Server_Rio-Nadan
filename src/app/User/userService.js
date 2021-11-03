@@ -33,7 +33,7 @@ exports.createUser = async function (email, password) {
         const userIdResult = await userDao.insertUserInfo(connection, insertUserInfoParams);
 
         // 데이터 INSERT 검증
-        if (userIdResult[0].affectedRows == 0) {
+        if (userIdResult.affectedRows == 0) {
             await connection.rollback();
             return errResponse(baseResponse.SIGNUP_USER_FAIL);
         }
@@ -132,7 +132,7 @@ exports.loginUser = async function (userId, password) {
 
         const refreshTokenInsertResult = await userDao.insertRefreshToken(connection, refreshToken, userInfoRows[0].USER_ID);
 
-        if (refreshTokenInsertResult[0].affectedRows == 0) {
+        if (refreshTokenInsertResult.affectedRows == 0) {
             await connection.rollback();
             return errResponse(baseResponse.INSERT_REFRESH_TOKEN_FAIL);
         }
@@ -214,13 +214,16 @@ exports.oauthSignIn = async function(email){
 exports.editProfile = async function (id, nickName, userIntro) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
+        const nickNameCheckRow = await userProvider.nickNameCheck(nickName);
 
         const editProfileResult = await userDao.updateUserProfile(connection, id, nickName, userIntro);
+
+        if(nickNameCheckRow.length > 0) return errResponse(baseResponse.SIGNUP_REDUNDANT_NICKNAME);
 
         //업데이트 검증
         if (editProfileResult.affectedRows == 0) {
             await connection.rollback();
-            return response(errResponse(baseResponse.UPDATE_PROFILE_FAIL));
+            return errResponse(baseResponse.UPDATE_PROFILE_FAIL);
         }
 
         return response(baseResponse.SUCCESS("프로필 변경에 성공하였습니다."));
@@ -242,9 +245,9 @@ exports.editEmail = async function (id, email) {
         const editEmailResult = await userDao.updateUserEmail(connection, id, email);
 
         // 업데이트 검증
-        if (editEmailResult[0].affectedRows == 0) {
+        if (editEmailResult.affectedRows == 0) {
             await connection.rollback();
-            return response(errResponse(baseResponse.UPDATE_EMAIL_FAIL));
+            return errResponse(baseResponse.UPDATE_EMAIL_FAIL);
         }
 
         return response(baseResponse.SUCCESS("이메일 변경에 성공하였습니다."));
@@ -267,9 +270,9 @@ exports.editPhoneNumber = async function (id, phoneNumber) {
         const editPhoneNumResult = await userDao.updateUserPhoneNumber(connection, id, phoneNumber);
 
         // 업데이트 검증
-        if (editPhoneNumResult[0].affectedRows == 0) {
+        if (editPhoneNumResult.affectedRows == 0) {
             await connection.rollback();
-            return response(errResponse(baseResponse.UPDATE_PHONE_NUMBER_FAIL));
+            return errResponse(baseResponse.UPDATE_PHONE_NUMBER_FAIL);
         }
 
         return response(baseResponse.SUCCESS("휴대폰 번호 변경에 성공하였습니다."));

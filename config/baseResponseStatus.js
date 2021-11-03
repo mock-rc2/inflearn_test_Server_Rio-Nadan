@@ -35,6 +35,7 @@ module.exports = {
     USER_NICK_NAME_EMPTY: {"isSuccess": false, "code": 2019, "message": "유저 닉네임이 비어있습니다"},
     USER_REDUNDANT_PHONE_NUMBER: {"isSuccess": false, "code": 2020, "message": "중복된 휴대폰 번호 입니다"},
     USER_PHONE_NUMBER_EMPTY: {"isSuccess": false, "code": 2021, "message": "휴대폰 번호가 비어있습니다"},
+    USER_PHONE_NUMBER_TYPE_ERROR:{"isSuccess": false, "code": 2021, "message": "잘못된 휴대폰 번호 양식입니다."},
 
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },

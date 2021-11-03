@@ -4,7 +4,7 @@ const userService = require("../../app/User/userService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 const requestHandler = require("../../../config/requestHandler")
-
+const regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 
@@ -31,19 +31,19 @@ exports.postUsers = async function (req, res) {
 
     // 빈 값 체크
     if (!email)
-        return res.send(response(baseResponse.SIGNIN_EMAIL_EMPTY("")));
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_EMPTY("")));
 
     // 길이 체크
     if (email.length > 30)
-        return res.send(response(baseResponse.SIGNIN_EMAIL_LENGTH));
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_LENGTH));
 
     // 형식 체크 (by 정규표현식)
     if (!regexEmail.test(email))
-        return res.send(response(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
 
     // 제가 지금 한거 입니다. 넵!
     if(password.length === 0)
-        return res.send(response(baseResponse.SIGNIN_PASSWORD_EMPTY));
+        return res.send(errResponse(baseResponse.SIGNIN_PASSWORD_EMPTY));
     // 기타 등등 - 추가하기
 
 
@@ -145,6 +145,10 @@ exports.editEmail = async function (req, res) {
 
     if(!email) return res.send(errResponse(baseResponse.USER_USEREMAIL_EMPTY));
 
+    // 형식 체크 (by 정규표현식)
+    if (!regexEmail.test(email))
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
+
     const userEditEmailResult = await userService.editEmail(id, email);
 
     return res.send(userEditEmailResult);
@@ -158,6 +162,9 @@ exports.editPhoneNumber = async function (req, res) {
     const phoneNumber = req.body.phoneNumber;
 
     if(!phoneNumber) return res.send(errResponse(baseResponse.USER_PHONE_NUMBER_EMPTY));
+
+    if(!regPhone.test(phoneNumber))
+        return res.send(errResponse(baseResponse.USER_PHONE_NUMBER_TYPE_ERROR));
 
     const userEditPhoneResult = await userService.editPhoneNumber(id, phoneNumber);
 
