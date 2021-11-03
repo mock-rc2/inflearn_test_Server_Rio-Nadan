@@ -8,3 +8,6 @@ const requestHandler = require("../../../config/requestHandler")
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 
+exports.getLectureList = async function(req,res){
+
+}
