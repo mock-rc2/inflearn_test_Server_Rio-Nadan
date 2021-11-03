@@ -127,6 +127,21 @@ async function selectUserPhoneNumber(connection, phoneNumber) {
 
   return resultRow;
 }
+
+async function selectUserNickName(connection, nickName) {
+  const selectUserNickNameQuery = `
+    SELECT NICK_NAME
+    FROM USERS 
+    WHERE NICK_NAME = ?;
+  `;
+
+  const [resultRow] = await connection.query(
+      selectUserNickNameQuery,
+      nickName
+      );
+
+  return resultRow;
+}
 module.exports = {
   selectUser,
   selectUserEmail,
@@ -138,5 +153,6 @@ module.exports = {
   insertRefreshToken,
   updateUserEmail,
   updateUserPhoneNumber,
-  selectUserPhoneNumber
+  selectUserPhoneNumber,
+  selectUserNickName
 };
