@@ -3,7 +3,8 @@ const userProvider = require("../../app/User/userProvider");
 const userService = require("../../app/User/userService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
-
+const requestHandler = require("../../../config/requestHandler")
+const regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 
@@ -13,7 +14,7 @@ const {emit} = require("nodemon");
  * [GET] /app/test
  */
 exports.getTest = async function (req, res) {
-     return res.send(response(baseResponse.SUCCESS))
+     return res.send(response(baseResponse.SUCCESS("성공 입니다")))
 }
 
 /**
@@ -24,9 +25,54 @@ exports.getTest = async function (req, res) {
 exports.postUsers = async function (req, res) {
 
     /**
-     * Body: email, password, nickname
+     * Body: email, password
      */
-    const {email, password, nickname} = req.body;
+    const {email, password} = req.body;
+
+    // 빈 값 체크
+    if (!email)
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_EMPTY("")));
+
+    // 길이 체크
+    if (email.length > 30)
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_LENGTH));
+
+    // 형식 체크 (by 정규표현식)
+    if (!regexEmail.test(email))
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
+
+    // 제가 지금 한거 입니다. 넵!
+    if(password.length === 0)
+        return res.send(errResponse(baseResponse.SIGNIN_PASSWORD_EMPTY));
+    // 기타 등등 - 추가하기
+
+
+    const signUpResponse = await userService.createUser(
+        email,
+        password
+    );
+
+    return res.send(signUpResponse);
+};
+// CORS 오류로 인한 보류
+/*exports.oauthKakaoLogin = async function (req,res) {
+
+    const accessToken = req.headers['access-token'];
+
+    const getOptions = {
+        header: {
+            'Content-Type': 'appication/x-www-form-urlencoded;charset=utf-8',
+            'Authorization': 'Bearer ' + accessToken
+        }
+    };
+
+    const getRes = await requestHandler.requestUserEmail(getOptions);
+
+    console.log(getRes);
+    let userInfo = JSON.parse(getRes.body);
+
+    let email = userInfo.kakao_account.email;
+    let name = userInfo.kakao_account.name;
 
     // 빈 값 체크
     if (!email)
@@ -40,114 +86,90 @@ exports.postUsers = async function (req, res) {
     if (!regexEmail.test(email))
         return res.send(response(baseResponse.SIGNUP_EMAIL_ERROR_TYPE));
 
-    // 기타 등등 - 추가하기
+    const checkParam = await userProvider.emailCheck(email);
 
+    if (checkParam.length < 1) {
+        const signUpResponse = await userService.oauthCreateUser(email,name);
 
-    const signUpResponse = await userService.createUser(
-        email,
-        password,
-        nickname
-    );
-
-    return res.send(signUpResponse);
-};
+        return res.send(signUpResponse);
+    }else{
+        const signInResponse = await userService.oauthSignIn(email);
+        return res.send(signInResponse);
+    }
+}*/
 
 /**
- * API No. 2
- * API Name : 유저 조회 API (+ 이메일로 검색 조회)
- * [GET] /app/users
+ * API Name : 유저 로그인 API
+ * [POST] /inflearn/users/login
  */
-exports.getUsers = async function (req, res) {
+exports.postLoginUsers = async function (req, res) {
 
     /**
      * Query String: email
      */
-    const email = req.query.email;
+    const {userId, password} = req.body;
+    // 유저 아이디 값 확인
+    if (!userId) return res.send(errResponse(baseResponse.USER_ID_EMPTY));
+    // 유저 패스워드 값 확인
+    if (!password) return res.send(errResponse(baseResponse.USER_PASSWORD_EMPTY));
+    // 유저아이디 길이 확인
+    if(userId.length>50) return res.send(errResponse(baseResponse.SIGNUP_USER_ID_LENGTH));
+    // 유저아이디 형식 확인
+    if(!regexEmail.test(userId)) return res.send(errResponse(baseResponse.SIGNUP_USER_ID_ERROR_TYPE));
 
-    if (!email) {
-        // 유저 전체 조회
-        const userListResult = await userProvider.retrieveUserList();
-        return res.send(response(baseResponse.SUCCESS, userListResult));
-    } else {
-        // 유저 검색 조회
-        const userListByEmail = await userProvider.retrieveUserList(email);
-        return res.send(response(baseResponse.SUCCESS, userListByEmail));
-    }
+    const userLoginResult = await userService.loginUser(userId,password);
+
+    return res.send(userLoginResult);
 };
 
-/**
- * API No. 3
- * API Name : 특정 유저 조회 API
- * [GET] /app/users/{userId}
- */
-exports.getUserById = async function (req, res) {
+exports.editProfile = async function (req, res) {
+    const token = req.verifiedToken;
 
-    /**
-     * Path Variable: userId
-     */
-    const userId = req.params.userId;
+    const userId = token.userId;
 
-    if (!userId) return res.send(errResponse(baseResponse.USER_USERID_EMPTY));
+    const {nickName, userIntro} = req.body;
 
-    const userByUserId = await userProvider.retrieveUser(userId);
-    return res.send(response(baseResponse.SUCCESS, userByUserId));
+    if(!nickName) return res.send(errResponse(baseResponse.USER_NICK_NAME_EMPTY));
+
+    const userEditProfileResult = await userService.editProfile(userId, nickName, userIntro);
+
+    return res.send(userEditProfileResult);
 };
 
+exports.editEmail = async function (req, res) {
+    const token = req.verifiedToken;
 
-// TODO: After 로그인 인증 방법 (JWT)
-/**
- * API No. 4
- * API Name : 로그인 API
- * [POST] /app/login
- * body : email, passsword
- */
-exports.login = async function (req, res) {
+    const id = token.userId;
 
-    const {email, password} = req.body;
+    const email = req.body.email;
 
-    // TODO: email, password 형식적 Validation
+    if(!email) return res.send(errResponse(baseResponse.USER_USEREMAIL_EMPTY));
 
-    const signInResponse = await userService.postSignIn(email, password);
+    // 형식 체크 (by 정규표현식)
+    if (!regexEmail.test(email))
+        return res.send(errResponse(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
 
-    return res.send(signInResponse);
-};
+    const userEditEmailResult = await userService.editEmail(id, email);
 
+    return res.send(userEditEmailResult);
+}
 
-/**
- * API No. 5
- * API Name : 회원 정보 수정 API + JWT + Validation
- * [PATCH] /app/users/:userId
- * path variable : userId
- * body : nickname
- */
-exports.patchUsers = async function (req, res) {
+exports.editPhoneNumber = async function (req, res) {
+    const token = req.verifiedToken;
 
-    // jwt - userId, path variable :userId
+    const id = token.userId;
 
-    const userIdFromJWT = req.verifiedToken.userId
+    const phoneNumber = req.body.phoneNumber;
 
-    const userId = req.params.userId;
-    const nickname = req.body.nickname;
+    if(!phoneNumber) return res.send(errResponse(baseResponse.USER_PHONE_NUMBER_EMPTY));
 
-    if (userIdFromJWT != userId) {
-        res.send(errResponse(baseResponse.USER_ID_NOT_MATCH));
-    } else {
-        if (!nickname) return res.send(errResponse(baseResponse.USER_NICKNAME_EMPTY));
+    if(!regPhone.test(phoneNumber))
+        return res.send(errResponse(baseResponse.USER_PHONE_NUMBER_TYPE_ERROR));
 
-        const editUserInfo = await userService.editUser(userId, nickname)
-        return res.send(editUserInfo);
-    }
-};
+    const userEditPhoneResult = await userService.editPhoneNumber(id, phoneNumber);
 
-
-
-
-
-
-
-
-
-
+    return res.send(userEditPhoneResult);
+}
 
 /** JWT 토큰 검증 API
  * [GET] /app/auto-login

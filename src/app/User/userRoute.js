@@ -2,26 +2,26 @@ module.exports = function(app){
     const user = require('./userController');
     const jwtMiddleware = require('../../../config/jwtMiddleware');
 
-    // 0. 테스트 API
+    // 테스트 API
     app.get('/inflearn/test', user.getTest)
 
-    // 1. 유저 생성 (회원가입) API
-    app.post('/app/users', user.postUsers);
-
-    // 2. 유저 조회 API (+ 검색)
-    app.get('/app/users',user.getUsers); 
-
-    // 3. 특정 유저 조회 API
-    app.get('/app/users/:userId', user.getUserById);
+    // 유저 로그인 API
+    app.post('/inflearn/users/login', user.postLoginUsers);
 
 
-    // TODO: After 로그인 인증 방법 (JWT)
-    // 로그인 하기 API (JWT 생성)
-    app.post('/app/login', user.login);
+    // 유저 회원가입 API
+    app.post('/inflearn/users/signup',user.postUsers);
 
-    // 회원 정보 수정 API (JWT 검증 및 Validation - 메소드 체이닝 방식으로 jwtMiddleware 사용)
-    app.patch('/app/users/:userId', jwtMiddleware, user.patchUsers)
+    app.patch('/inflearn/users/profile', jwtMiddleware, user.editProfile);
 
+    app.patch('/inflearn/users/email', jwtMiddleware, user.editEmail);
+
+    app.patch('/inflearn/users/phonenumber',jwtMiddleware, user.editPhoneNumber);
+
+    // 소셜 로그인 API CORS 오류로 인한 보류
+    // app.get('/inflearn/users/oauth/login',user.oauthKakaoLogin);
+
+    // 강의 목록 API 브런치 따서 작업하면 됌
 
 
 };

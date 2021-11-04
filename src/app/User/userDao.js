@@ -11,9 +11,9 @@ async function selectUser(connection) {
 // 이메일로 회원 조회
 async function selectUserEmail(connection, email) {
   const selectUserEmailQuery = `
-                SELECT email, nickname 
-                FROM UserInfo 
-                WHERE email = ?;
+                SELECT EMAIL, USER_ID, STATUS
+                FROM USERS 
+                WHERE EMAIL = ?;
                 `;
   const [emailRows] = await connection.query(selectUserEmailQuery, email);
   return emailRows;
@@ -22,9 +22,9 @@ async function selectUserEmail(connection, email) {
 // userId 회원 조회
 async function selectUserId(connection, userId) {
   const selectUserIdQuery = `
-                 SELECT id, email, nickname 
-                 FROM UserInfo 
-                 WHERE id = ?;
+                 SELECT USER_ID, EMAIL, NICK_NAME 
+                 FROM USERS 
+                 WHERE USER_ID = ?;
                  `;
   const [userRow] = await connection.query(selectUserIdQuery, userId);
   return userRow;
@@ -33,8 +33,8 @@ async function selectUserId(connection, userId) {
 // 유저 생성
 async function insertUserInfo(connection, insertUserInfoParams) {
   const insertUserInfoQuery = `
-        INSERT INTO UserInfo(email, password, nickname)
-        VALUES (?, ?, ?);
+        INSERT INTO USERS(email, password, USER_ROLE_KEY)
+        VALUES (?, ?, 'S');
     `;
   const insertUserInfoRow = await connection.query(
     insertUserInfoQuery,
@@ -47,9 +47,9 @@ async function insertUserInfo(connection, insertUserInfoParams) {
 // 패스워드 체크
 async function selectUserPassword(connection, selectUserPasswordParams) {
   const selectUserPasswordQuery = `
-        SELECT email, nickname, password
-        FROM UserInfo 
-        WHERE email = ? AND password = ?;`;
+        SELECT USER_ID, EMAIL, PASSWORD, STATUS
+        FROM USERS 
+        WHERE EMAIL = ? AND PASSWORD = ?;`;
   const selectUserPasswordRow = await connection.query(
       selectUserPasswordQuery,
       selectUserPasswordParams
@@ -71,13 +71,76 @@ async function selectUserAccount(connection, email) {
   return selectUserAccountRow[0];
 }
 
-async function updateUserInfo(connection, id, nickname) {
+async function updateUserProfile(connection, id, nickName, userIntro) {
   const updateUserQuery = `
-  UPDATE UserInfo 
-  SET nickname = ?
-  WHERE id = ?;`;
-  const updateUserRow = await connection.query(updateUserQuery, [nickname, id]);
+  UPDATE USERS 
+  SET NICK_NAME = ?, INTRODUCE_MESSAGE = ?
+  WHERE  USER_ID = ?;`;
+  const updateUserRow = await connection.query(updateUserQuery, [nickName, userIntro, id]);
   return updateUserRow[0];
+}
+
+async function insertRefreshToken(connection, token, userId) {
+  const insertTokenQuery = `
+    UPDATE USERS 
+      SET USER_REFRESH_TOKEN  = ? 
+    WHERE USER_ID = ?;
+  `;
+
+  const insertTokenRow = await connection.query(insertTokenQuery, [token, userId]);
+
+  return insertTokenRow;
+}
+
+async function updateUserEmail(connection, id, email) {
+  const updateUserEmailQuery = `
+    UPDATE USERS
+    SET EMAIL = ?
+    WHERE USER_ID = ?;
+  `;
+
+  const resultRows = await connection.query(updateUserEmailQuery, [email, id]);
+
+  return resultRows;
+}
+
+async function updateUserPhoneNumber(connection, id, phoneNumber) {
+  const updateUserPhoneNumQuery = `
+    UPDATE USERS
+    SET PHONE_NUMBER = ?
+    WHERE USER_ID = ?;
+  `;
+
+  const resultRow = await connection.query(updateUserPhoneNumQuery, [phoneNumber, id]);
+
+  return resultRow;
+}
+
+async function selectUserPhoneNumber(connection, phoneNumber) {
+  const selectUserPhoneNumber = `
+    SELECT PHONE_NUMBER
+    FROM USERS
+    WHERE PHONE_NUMBER = ?;
+  `;
+
+  const [resultRow] = await connection.query(selectUserPhoneNumber,phoneNumber);
+
+  return resultRow;
+}
+
+async function selectUserNickName(connection, nickName) {
+  const selectUserNickNameQuery = `
+    SELECT NICK_NAME
+    FROM USERS 
+    WHERE NICK_NAME = ?;
+  `;
+
+  const [resultRow] = await connection.query(
+      selectUserNickNameQuery,
+      nickName
+      );
+
+  return resultRow;
 }
 
 
@@ -88,5 +151,10 @@ module.exports = {
   insertUserInfo,
   selectUserPassword,
   selectUserAccount,
-  updateUserInfo,
+  updateUserProfile,
+  insertRefreshToken,
+  updateUserEmail,
+  updateUserPhoneNumber,
+  selectUserPhoneNumber,
+  selectUserNickName
 };

@@ -56,3 +56,18 @@ exports.accountCheck = async function (email) {
 
   return userAccountResult;
 };
+
+exports.phoneNumberCheck = async function (phoneNumber) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const userAccountResult = await userDao.selectUserPhoneNumber(connection, phoneNumber);
+  connection.release();
+
+  return userAccountResult;
+};
+
+exports.nickNameCheck = async function(nickName) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const userNickNameResult = await userDao.selectUserNickName(connection, nickName);
+  connection.release();
+  return userNickNameResult;
+}
