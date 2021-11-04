@@ -142,6 +142,8 @@ async function selectUserNickName(connection, nickName) {
 
   return resultRow;
 }
+
+
 module.exports = {
   selectUser,
   selectUserEmail,

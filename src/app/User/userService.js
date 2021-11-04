@@ -42,6 +42,7 @@ exports.createUser = async function (email, password) {
 
 
     } catch (err) {
+        await connection.rollback();
         logger.error(`App - createUser Service error\n: ${err.message}`);
         return errResponse(baseResponse.SERVER_ERROR);
     } finally {
@@ -144,6 +145,7 @@ exports.loginUser = async function (userId, password) {
         });
 
     } catch (err) {
+        await connection.rollback();
         logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
         return errResponse(baseResponse.SERVER_ERROR);
     } finally {
@@ -228,6 +230,7 @@ exports.editProfile = async function (id, nickName, userIntro) {
 
         return response(baseResponse.SUCCESS("프로필 변경에 성공하였습니다."));
     } catch (err) {
+        await connection.rollback();
         logger.error(`App - editUserProfile Service error\n: ${err.message}`);
         return errResponse(baseResponse.SERVER_ERROR);
     } finally {
@@ -252,6 +255,7 @@ exports.editEmail = async function (id, email) {
 
         return response(baseResponse.SUCCESS("이메일 변경에 성공하였습니다."));
     } catch (err) {
+        await connection.rollback();
         logger.error(`App - editUserEmail Service error\n: ${err.message}`);
         return errResponse(baseResponse.SERVER_ERROR);
     } finally {
@@ -277,6 +281,7 @@ exports.editPhoneNumber = async function (id, phoneNumber) {
 
         return response(baseResponse.SUCCESS("휴대폰 번호 변경에 성공하였습니다."));
     } catch (err) {
+        await connection.rollback();
         logger.error(`App - editUserEmail Service error\n: ${err.message}`);
         return errResponse(baseResponse.SERVER_ERROR);
     } finally {
