@@ -41,7 +41,6 @@ exports.postUsers = async function (req, res) {
     if (!regexEmail.test(email))
         return res.send(response(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
 
-    // 제가 지금 한거 입니다. 넵!
     if(password.length === 0)
         return res.send(response(baseResponse.SIGNIN_PASSWORD_EMPTY));
     // 기타 등등 - 추가하기

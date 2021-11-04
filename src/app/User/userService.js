@@ -242,7 +242,7 @@ exports.editEmail = async function (id, email) {
         const editEmailResult = await userDao.updateUserEmail(connection, id, email);
 
         // 업데이트 검증
-        if (editEmailResult[0].affectedRows == 0) {
+        if (editEmailResult.affectedRows == 0) {
             await connection.rollback();
             return response(errResponse(baseResponse.UPDATE_EMAIL_FAIL));
         }
