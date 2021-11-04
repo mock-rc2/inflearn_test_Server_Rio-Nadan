@@ -1,7 +1,7 @@
 async function selectLectureList (connection){
     const lectureListQuery = `
     select distinct 
-        LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,STAR_POINT,SALE_PERCENT,
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,STAR_POINT,SALE_PERCENT,
         PRICE,U.NICK_NAME,LEARNING_LEVEL,LTC.BIG_CATEGORY_NAME,
         LMC.MIDDLE_CATEGORY_NAME 
     from LECTURES
