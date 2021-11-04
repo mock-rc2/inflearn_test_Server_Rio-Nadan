@@ -9,7 +9,16 @@ const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
 const {getUserLecture} = require("./lectureController");
 
-exports.getLectureList = async function(req,res){
+/**
+ * API No.
+ * API Name : 강의 목록 조회 API
+ * [GET] /inflearn/courses/lectures
+ */
+exports.getAllLectureList = async function(req,res){
+
+    const lectureResult = await lectureProvider.getLectureList();
+
+    return res.send(lectureResult);
 
 }
 
