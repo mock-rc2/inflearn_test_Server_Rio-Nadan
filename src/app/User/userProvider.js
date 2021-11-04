@@ -64,3 +64,10 @@ exports.phoneNumberCheck = async function (phoneNumber) {
 
   return userAccountResult;
 };
+
+exports.nickNameCheck = async function(nickName) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const userNickNameResult = await userDao.selectUserNickName(connection, nickName);
+  connection.release();
+  return userNickNameResult;
+}
