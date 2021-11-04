@@ -31,7 +31,6 @@ exports.getLectureList = async function(){
         //map(1) -> {id:1,name:스프링 강의,tag:[]}
         //map(2) -> {id:2,name: 디자인 패턴 강의,tag:[]}
         map.set(row.LECTURE_ID, row);
-
         // console.log(row.LECTURE_ID);
         // console.log(map.get(1));
         // console.log(map.has(row.LECTURE_ID));
@@ -44,7 +43,7 @@ exports.getLectureList = async function(){
     await middleResult.forEach(function(row){
        let lecture = map.get(row.LECTURE_ID);
        console.log(lecture);
-       lecture.MIDDLE_CATEGORY_NAME.push(row);
+       lecture.MIDDLE_CATEGORY_NAME.push(row.MIDDLE_CATEGORY_NAME);
        map.set(row.LECTURE_ID,lecture);
     });
 
@@ -55,7 +54,7 @@ exports.getLectureList = async function(){
         let lecture = map.get(row.LECTURE_ID);
         //{id:1,name:스프링 강의,tag:[{id:1, name:backend}]}
         //{id:1,name:스프링 강의,tag:[{id:1, name:backend}, {id:1, name:java}]}
-        lecture.TAG.push(row);
+        lecture.TAG.push(row.CATEGORY_TAG_NAME);
         //map(1) ->{id:1,name:스프링 강의,tag:[{id:1, name:backend}]}
         //map(1) ->{id:1,name:스프링 강의,tag:[{id:1, name:backend}, {id:1, name:java}]}
         map.set(row.LECTURE_ID, lecture);
