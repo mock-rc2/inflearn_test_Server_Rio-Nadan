@@ -180,7 +180,7 @@ module.exports = {
     selectLectureCategory,
     selectLectureTags,
     selectLectureIntroduction,
-    selectLectureMiddle,
+    selectLectureList,
     selectLectureTag,
     selectLectureMiddle
 };
