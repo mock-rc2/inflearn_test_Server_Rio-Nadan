@@ -42,3 +42,18 @@ exports.getLectureHeaderItems = async function(req, res) {
 
     return res.send(getUserLectureHeaderResult);
 }
+
+exports.getLectureIntroduction = async function(req, res) {
+    const lectureId = req.params['lectureId'];
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+
+    const lectureIntroduction = await lectureProvider.selectLectureIntroduction(lectureId);
+
+    if(!lectureIntroduction) return res.send(errResponse(baseResponse.GET_LECTURE_INTRODUCTION_FAIL));
+
+    return res.send(response(baseResponse.SUCCESS("강의 소개 조회 성공"), lectureIntroduction));
+}

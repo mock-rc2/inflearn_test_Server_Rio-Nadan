@@ -111,6 +111,21 @@ async function selectLectureTags(connection, lectureId) {
     return lectureTagRows;
 }
 
+async function selectLectureIntroduction(connection, lectureId) {
+    const selectIntroductionQuery = `
+        SELECT INTRODUCTION 
+        FROM LECTURES 
+        WHERE LECTURE_ID = ?;
+    `;
+
+    const [lectureIntroductionRows] = await connection.query(
+        selectIntroductionQuery,
+        lectureId
+    );
+
+    return lectureIntroductionRows;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -118,5 +133,6 @@ module.exports = {
     selectLectureStudentCount,
     selectLecturePreviewCount,
     selectLectureCategory,
-    selectLectureTags
+    selectLectureTags,
+    selectLectureIntroduction
 };

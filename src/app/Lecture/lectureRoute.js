@@ -8,4 +8,6 @@ module.exports = function(app){
     app.get('/inflearn/lectures/:lectureId/check', jwtMiddleware, lecture.getUserLecture);
 
     app.get('/inflearn/lectures/:lectureId/header', lecture.getLectureHeaderItems);
+
+    app.get('/inflearn/lectures/:lectureId/introduction', lecture.getLectureIntroduction);
 };

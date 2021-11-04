@@ -65,3 +65,11 @@ exports.selectLectureTags = async function(lectureId) {
 
     return selectLectureTagRows;
 }
+
+exports.selectLectureIntroduction = async function(lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectLectureIntroduction = await lectureDao.selectLectureIntroduction(connection, lectureId);
+    connection.release();
+
+    return selectLectureIntroduction[0];
+}
