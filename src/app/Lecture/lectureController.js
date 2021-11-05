@@ -4,10 +4,7 @@ const lectureService = require("../../app/Lecture/lectureService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 const requestHandler = require("../../../config/requestHandler")
-
 const regexEmail = require("regex-email");
-const {emit} = require("nodemon");
-const {getUserLecture} = require("./lectureController");
 
 /**
  * API No.
@@ -65,4 +62,17 @@ exports.getLectureIntroduction = async function(req, res) {
     if(!lectureIntroduction) return res.send(errResponse(baseResponse.GET_LECTURE_INTRODUCTION_FAIL));
 
     return res.send(response(baseResponse.SUCCESS("강의 소개 조회 성공"), lectureIntroduction));
+}
+
+exports.getSessionClasses = async function(req, res) {
+    const lectureId = req.params['lectureId'];
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+
+    const sessionClasses = await lectureService.getSessionClasses(lectureId);
+
+    return res.send(sessionClasses);
 }

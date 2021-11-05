@@ -140,7 +140,7 @@ async function selectLectureCategory(connection, lectureId) {
 }
 
 async function selectLectureTags(connection, lectureId) {
-    const selectLectureTagsQuery = `
+    const selectLectureTagQuery = `
         SELECT MIDDLE_TAG.CATEGORY_TAG_ID, MIDDLE_TAG.CATEGORY_TAG_NAME
         FROM MIDDLE_CATEGORY_TAGS AS MIDDLE_TAG
             INNER JOIN LECTURE_TAGS AS LECTURE_TAG
@@ -149,17 +149,18 @@ async function selectLectureTags(connection, lectureId) {
     `;
 
     const [lectureTagRows] = await connection.query(
-        selectLectureTagsQuery,
+        selectLectureTagQuery,
         lectureId
     );
 
     return lectureTagRows;
 }
 
+
 async function selectLectureIntroduction(connection, lectureId) {
     const selectIntroductionQuery = `
-        SELECT INTRODUCTION 
-        FROM LECTURES 
+        SELECT INTRODUCTION
+        FROM LECTURES
         WHERE LECTURE_ID = ?;
     `;
 
@@ -171,6 +172,36 @@ async function selectLectureIntroduction(connection, lectureId) {
     return lectureIntroductionRows;
 }
 
+async function selectLectureSession(connection, lectureId) {
+    const selectLectureSessionQuery = `
+        SELECT SESSION_ID, SESSION_NAME, SESSION_TOTAL_TIME
+        FROM LECTURE_SESSION
+        WHERE LECTURE_ID = ?
+    `;
+
+    const [resultRows] = await connection.query(
+        selectLectureSessionQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function selectSessionClasses(connection, lectureId) {
+    const selectSessionClassesQuery = `
+        SELECT CLASS_ID, CLASS_NAME, CLASS_ROLE_ID, ROLE_DESCRIPTION
+        FROM LECTURE_CLASSES
+        WHERE SESSION_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectSessionClassesQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -179,8 +210,12 @@ module.exports = {
     selectLecturePreviewCount,
     selectLectureCategory,
     selectLectureTags,
+
     selectLectureIntroduction,
     selectLectureList,
     selectLectureTag,
-    selectLectureMiddle
+    selectLectureMiddle,
+
+    selectLectureSession,
+    selectSessionClasses
 };

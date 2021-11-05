@@ -54,7 +54,8 @@ module.exports = {
     INSERT_REFRESH_TOKEN_FAIL: { "isSuccess": false, "code": 3011, "message":"refresh 토큰 동기화에 실패했습니다."},
     UPDATE_PHONE_NUMBER_FAIL: { "isSuccess": false, "code": 3012, "message":"휴대폰 번호 저장이 실패했습니다."},
     CHECK_USER_LECTURES_FAIL: { "isSuccess": false, "code": 3013, "message":"강의를 소유하지 않았습니다."},
-    GET_LECTURE_INTRODUCTION_FAIL: { "isSuccess": false, "code": 3014, "message":"강의 조회를 실패하였습니다."},
+    GET_LECTURE_INTRODUCTION_FAIL: { "isSuccess": false, "code": 3014, "message":"강의 소개 조회를 실패하였습니다."},
+    GET_LECTURE_SESSION_FAIL: { "isSuccess": false, "code": 3015, "message":"강의 세션 조회를 실패하였습니다."},
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

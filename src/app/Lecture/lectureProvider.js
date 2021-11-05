@@ -5,6 +5,7 @@ const {response} = require("../../../config/response");
 const {errResponse} = require("../../../config/response");
 const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
+const {query} = require("winston");
 
 
 exports.getLectureList = async function() {
@@ -132,10 +133,29 @@ exports.selectLectureTags = async function (lectureId) {
     return selectLectureTagRows;
 }
 
+
 exports.selectLectureIntroduction = async function (lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
     const selectLectureIntroduction = await lectureDao.selectLectureIntroduction(connection, lectureId);
     connection.release();
 
     return selectLectureIntroduction[0];
+}
+
+exports.selectLectureSessions = async function(lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectLectureSessionRows = await lectureDao.selectLectureSession(connection, lectureId);
+    connection.release();
+
+    return selectLectureSessionRows;
+}
+
+exports.selectSessionClasses = async function (sessionId) {
+    const connection =  await pool.getConnection(async (conn) => conn);
+    const selectClasses = await lectureDao.selectSessionClasses(connection, sessionId);
+    connection.release();
+
+    if(!selectClasses) return [];
+
+    return selectClasses;
 }
