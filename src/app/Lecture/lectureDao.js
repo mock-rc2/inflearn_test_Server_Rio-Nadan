@@ -15,6 +15,23 @@ async function selectLectureList (connection){
     return lectureListResult;
 }
 
+async function selectTopLectureList(connection,topCategoryName){
+    const topLectureListQuery = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(topLectureListQuery,topCategoryName);
+    return resultRows;
+}
+
 async function selectLectureTag(connection){
     const lectureTagQuery = `
     select  
@@ -215,7 +232,8 @@ module.exports = {
     selectLectureList,
     selectLectureTag,
     selectLectureMiddle,
-
     selectLectureSession,
-    selectSessionClasses
+    selectSessionClasses,
+    selectTopLectureList
+
 };

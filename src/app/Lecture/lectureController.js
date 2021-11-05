@@ -13,10 +13,28 @@ const regexEmail = require("regex-email");
  */
 exports.getAllLectureList = async function(req,res){
 
-    const lectureResult = await lectureProvider.getLectureList();
+    const lectureResult = await lectureProvider.getAllLectureList();
 
     return res.send(lectureResult);
 
+}
+/**
+ * API No.
+ * API Name : TOP 카테고리 별 강의 조회 API
+ * [GET] /inflearn/courses/lectures/{topCategoryName}
+ */
+exports.getTopLectureList = async function(req,res){
+    /**
+     * Path Variable(타겟이 있는경우): topCategoryName
+     */
+    const topCategoryName = req.params.topCategoryName;
+
+    if(!topCategoryName)
+        return res.redirect('/inflearn/courses/lectures');
+
+    const lectureResult = await lectureProvider.getLectureList(topCategoryName);
+
+    return res.send(lectureResult);
 }
 
 exports.getUserLecture = async function(req, res) {

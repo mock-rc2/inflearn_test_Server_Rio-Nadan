@@ -7,36 +7,38 @@ const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
 const {query} = require("winston");
 
+let map = new Map();
 
-exports.getLectureList = async function() {
+exports.getAllLectureList = async function() {
     const connection = await pool.getConnection(async (conn) => conn);
 
     const resultList = await lectureDao.selectLectureList(connection);
     const tagResult = await lectureDao.selectLectureTag(connection);
     const middleResult = await lectureDao.selectLectureMiddle(connection);
     // console.log(tagResult);
-    console.log(middleResult);
+    // console.log(middleResult);
 
-    let map = new Map();
-    // console.log("쌩 map: " + map);
+
+    //console.log("쌩 map: " + map); // => 쌩 map: [object Map]
     // [{id:1,name:스프링 강의},{id:2,name: 디자인 패턴 강의}]
 
     // {id:1,name:스프링 강의} -> row, {id:2,name: 디자인 패턴 강의} -> row
     await resultList.forEach(function (row) {
-        // row = {id:1,name:스프링 강의,tag:[]}
-        row.MIDDLE_CATEGORY_NAME = [];
-        row.TAG = [];
+        // row = {id:1,name:스프링 강의,MIDDLE_CATEGORY_NAME:[]}
+        row.MIDDLE_CATEGORY_NAME = []; //row에 MIDDLE_CATEGORY_NAME 배열 추가.
+        // row = {id:1,name:스프링 강의,MIDDLE_CATEGORY_NAME:[],TAG:[]}
+        row.TAG = []; //row에 TAG배열 추가.
 
-        // row.tag = [] -> row에 tag배열 추가.
+        //console.log("resultList_row:" + row.tag);// => resultList_row:undefined 아직 TAG row에는 아무것도 들어가지 않았음
 
-        // console.log("resultList_row:" + row.tag);
         //map(1) -> {id:1,name:스프링 강의,tag:[]}
         //map(2) -> {id:2,name: 디자인 패턴 강의,tag:[]}
         map.set(row.LECTURE_ID, row);
-        // console.log(row.LECTURE_ID);
-        // console.log(map.get(1));
-        // console.log(map.has(row.LECTURE_ID));
-        // console.log(map.size);
+
+        //console.log(row.LECTURE_ID); // => 1 2 4 5 6 7 8 lecture
+         console.log(map.get(1)); // map 에 key값 = 1 인 정보 불러오기(forEach이므로 반복해서 가져옴)
+        // console.log(map.has(row.LECTURE_ID)); // true. 해당 map은 key로 row.LECTURE_ID를 씀
+        // console.log(map.size); // map의 사이즈 1~7까지 순차적으로 표현.(forEach로 반복하여 개수가 증가함)
         // console.log(map.keys());
         // console.log(row);
 
@@ -44,7 +46,7 @@ exports.getLectureList = async function() {
 
     await middleResult.forEach(function (row) {
         let lecture = map.get(row.LECTURE_ID);
-        console.log(lecture);
+        // console.log(lecture);
         lecture.MIDDLE_CATEGORY_NAME.push(row.MIDDLE_CATEGORY_NAME);
         map.set(row.LECTURE_ID, lecture);
     });
@@ -69,6 +71,18 @@ exports.getLectureList = async function() {
     connection.release();
 
     return response(baseResponse.SUCCESS("강의정보 조회에 성공했습니다."), Object.fromEntries(map));
+}
+
+exports.getLectureList = async function(topCategoryName){
+    const connection = await pool.getConnection(async (conn)=>conn);
+    const getResultList = await lectureDao.selectTopLectureList(connection,topCategoryName);
+    const middleResult = await lectureDao.selectLectureMiddle(connection);
+    const tagResult = await lectureDao.selectLectureTag(connection);
+
+
+    connection.release();
+
+    return response(baseResponse.SUCCESS("해당 카테고리의 강의 목록 조회에 성공했습니다"),getResultList);
 }
 
 exports.checkUserLecture = async function (id, lectureId) {
