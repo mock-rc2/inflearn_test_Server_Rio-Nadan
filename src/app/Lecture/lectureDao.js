@@ -204,7 +204,8 @@ async function selectSessionClasses(connection, lectureId) {
 
 async function selectLectureReviews(connection, lectureId) {
     const selectLectureReviewQuery = `
-        SELECT USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
         FROM LECTURE_REVIEWS AS REVIEW 
             INNER JOIN USERS 
                 ON REVIEW.USER_ID = USERS.USER_ID
@@ -233,6 +234,49 @@ async function insertLectureReview(connection, reviewParams) {
     return result;
 }
 
+async function updateLectureReview(connection, starPoint, review, reviewId) {
+    const updateLectureReviewQuery = `
+        UPDATE LECTURE_REVIEWS
+        SET STAR_POINT = ?, REVIEW_COMMENT = ?
+        WHERE LECTURE_REVIEW_ID = ?;
+    `;
+
+    const updateLectureRows = await connection.query(
+        updateLectureReviewQuery,
+        [starPoint, review, reviewId]
+    )
+
+    return updateLectureRows;
+}
+
+async function selectUserLectureReview(connection, userId, reviewId) {
+    const selectUserLectureReviewQuery = `
+        SELECT LECTURE_REVIEW_ID
+        FROM LECTURE_REVIEWS
+        WHERE USER_ID = ? AND LECTURE_REVIEW_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectUserLectureReviewQuery,
+        [userId, reviewId]
+    );
+
+    return resultRows;
+}
+
+async function deleteUserReview(connection, reviewId){
+    const deleteUserReviewQuery = `
+        DELETE FROM LECTURE_REVIEWS WHERE LECTURE_REVIEW_ID = ?;
+    `;
+
+    const deleteUserReviewResult = await connection.query(
+        deleteUserReviewQuery,
+        reviewId
+    );
+
+    return deleteUserReviewResult;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -250,5 +294,8 @@ module.exports = {
     selectLectureSession,
     selectSessionClasses,
     selectLectureReviews,
-    insertLectureReview
+    insertLectureReview,
+    updateLectureReview,
+    selectUserLectureReview,
+    deleteUserReview
 };

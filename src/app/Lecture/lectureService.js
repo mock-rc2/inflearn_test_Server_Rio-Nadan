@@ -10,6 +10,7 @@ const {errResponse} = require("../../../config/response");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const {connect} = require("http2");
+const {checkUserLecture} = require("./lectureProvider");
 
 exports.userLectureCheck = async function (id, lectureId) {
     try{
@@ -76,10 +77,49 @@ exports.postLectureReview = async function(lectureId, userId, starPoint, review)
         return response(baseResponse.SUCCESS("리뷰 작성 성공"));
     }catch (err){
         await connection.rollback();
-        logger.error(`App - getSessionClasses Service error\n: ${err.message}`);
+        logger.error(`App - postLectureReview Service error\n: ${err.message}`);
         return errResponse(baseResponse.SERVER_ERROR);
-    }finally {
+    } finally {
         connection.release();
     }
 }
 
+exports.putLectureReview = async function(starPoint, review, reviewId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try{
+        const reviewUpdateResult = await lectureDao.updateLectureReview(connection, starPoint, review, reviewId);
+
+        if(reviewUpdateResult.affectedRows == 0){
+            await connection.rollback();
+            return errResponse(baseResponse.UPDATE_LECTURE_REVIEW_FAIL);
+        }
+
+        return response(baseResponse.SUCCESS("리뷰 수정 성공"));
+    }catch (err){
+        await connection.rollback();
+        logger.error(`App - putLectureReview Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    } finally {
+        connection.release();
+    }
+}
+
+exports.deleteLectureReview = async function(reviewId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try{
+        const reviewDeleteResult = await lectureDao.deleteUserReview(connection, reviewId);
+
+        if(reviewDeleteResult.affectedRows == 0){
+            await connection.rollback();
+            return errResponse(baseResponse.DELETE_LECTURE_REVIEW_FAIL);
+        }
+
+        return response(baseResponse.SUCCESS("리뷰 삭제 성공"));
+    }catch (err){
+        await connection.rollback();
+        logger.error(`App - deleteLectureReview Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    } finally {
+        connection.release();
+    }
+}

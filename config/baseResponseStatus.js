@@ -37,7 +37,9 @@ module.exports = {
     USER_PHONE_NUMBER_EMPTY: {"isSuccess": false, "code": 2021, "message": "휴대폰 번호가 비어있습니다"},
     USER_PHONE_NUMBER_TYPE_ERROR:{"isSuccess": false, "code": 2022, "message": "잘못된 휴대폰 번호 양식입니다."},
     LECTURE_NOT_EXISTENCE:{"isSuccess": false, "code": 2023, "message": "존재하지 않는 강의 입니다"},
-
+    LECTURE_REVIEW_EMPTY:{"isSuccess": false, "code": 2024, "message": "리뷰가 비어있습니다."},
+    USER_REVIEW_NOT_EXIST:{"isSuccess": false, "code": 2025, "message": "작성한 리뷰가 없습니다."},
+    LECTURE_ID_REVIEW_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3002, "message":"중복된 닉네임입니다." },
@@ -57,7 +59,8 @@ module.exports = {
     GET_LECTURE_INTRODUCTION_FAIL: { "isSuccess": false, "code": 3014, "message":"강의 소개 조회를 실패하였습니다."},
     GET_LECTURE_SESSION_FAIL: { "isSuccess": false, "code": 3015, "message":"강의 세션 조회를 실패하였습니다."},
     INSERT_LECTURE_REVIEW_FAIL: { "isSuccess": false, "code": 3016, "message":"강의 리뷰 작성을 실패하였습니다."},
-
+    UPDATE_LECTURE_REVIEW_FAIL: { "isSuccess": false, "code": 3017, "message":"강의 리뷰 수정을 실패하였습니다."},
+    DELETE_LECTURE_REVIEW_FAIL: { "isSuccess": false, "code": 3018, "message":"강의 리뷰 삭제를 실패하였습니다."},
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},

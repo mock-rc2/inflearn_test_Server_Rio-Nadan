@@ -169,3 +169,11 @@ exports.selectLectureReviews = async function (lectureId) {
 
     return selectReviews;
 }
+
+exports.checkUserLectureReview = async function (userId, reviewId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectUserReview = await lectureDao.selectUserLectureReview(connection, userId, reviewId);
+    connection.release();
+
+    return selectUserReview;
+}
