@@ -15,7 +15,7 @@ exports.getAllLectureList = async function(req,res){
 
     const lectureResult = await lectureProvider.getAllLectureList();
 
-    return res.send(lectureResult);
+    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
 
 }
 /**
@@ -33,6 +33,28 @@ exports.getTopLectureList = async function(req,res){
         return res.redirect('/inflearn/courses/lectures');
 
     const lectureResult = await lectureProvider.getLectureList(topCategoryName);
+
+    return res.send(lectureResult);
+}
+
+/**
+ * API No.
+ * API Name : TOP 카테고리 별 강의 조회 API
+ * [GET] /inflearn/courses/lectures/{topCategoryName}/{middleCategoryName}
+ */
+exports.getMiddleLectureList = async function(req,res){
+    /**
+     * Path Variable(타겟이 있는경우): topCategoryName,middleCategoryName
+     */
+    const topCategoryName = req.params.topCategoryName;
+    const middleCategoryName = req.params.middleCategoryName;
+
+    if(!topCategoryName)
+        return res.redirect('/inflearn/courses/lectures');
+    else if(!middleCategoryName)
+        return res.redirect('/inflearn/courses/lectures/:topCategoryName')
+
+    const lectureResult = await lectureProvider.getMiddleLectureList(topCategoryName,middleCategoryName);
 
     return res.send(lectureResult);
 }

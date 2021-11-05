@@ -7,7 +7,7 @@ const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
 const {query} = require("winston");
 
-let map = new Map();
+
 
 exports.getAllLectureList = async function() {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -18,6 +18,7 @@ exports.getAllLectureList = async function() {
     // console.log(tagResult);
     // console.log(middleResult);
 
+    let map = new Map();
 
     //console.log("쌩 map: " + map); // => 쌩 map: [object Map]
     // [{id:1,name:스프링 강의},{id:2,name: 디자인 패턴 강의}]
@@ -36,7 +37,7 @@ exports.getAllLectureList = async function() {
         map.set(row.LECTURE_ID, row);
 
         //console.log(row.LECTURE_ID); // => 1 2 4 5 6 7 8 lecture
-         console.log(map.get(1)); // map 에 key값 = 1 인 정보 불러오기(forEach이므로 반복해서 가져옴)
+        // console.log(map.get(1)); // map 에 key값 = 1 인 정보 불러오기(forEach이므로 반복해서 가져옴)
         // console.log(map.has(row.LECTURE_ID)); // true. 해당 map은 key로 row.LECTURE_ID를 씀
         // console.log(map.size); // map의 사이즈 1~7까지 순차적으로 표현.(forEach로 반복하여 개수가 증가함)
         // console.log(map.keys());
@@ -70,19 +71,56 @@ exports.getAllLectureList = async function() {
 
     connection.release();
 
-    return response(baseResponse.SUCCESS("강의정보 조회에 성공했습니다."), Object.fromEntries(map));
+    return Object.fromEntries(map);
 }
 
 exports.getLectureList = async function(topCategoryName){
     const connection = await pool.getConnection(async (conn)=>conn);
     const getResultList = await lectureDao.selectTopLectureList(connection,topCategoryName);
-    const middleResult = await lectureDao.selectLectureMiddle(connection);
-    const tagResult = await lectureDao.selectLectureTag(connection);
+    const middleResult = await lectureDao.selectTopLectureMiddle(connection,topCategoryName);
+    const tagResult = await lectureDao.selectTopLectureTag(connection,topCategoryName);
 
+    let map = new Map();
+
+    await getResultList.forEach(function (row){
+       row.MIDDLE_CATEGORY_NAME = [];
+       row.TAG =[];
+
+       map.set(row.LECTURE_ID,row);
+       // console.log(map);
+       // console.log(map.size);
+    });
+
+    await middleResult.forEach(function(row){
+        let lecture = map.get(row.LECTURE_ID);
+        //console.log(row)
+        lecture.MIDDLE_CATEGORY_NAME.push(row.MIDDLE_CATEGORY_NAME);
+        map.set(row.LECTURE_ID,lecture);
+    });
+
+    await tagResult.forEach(function(row){
+        let lecture = map.get(row.LECTURE_ID);
+        lecture.TAG.push(row.CATEGORY_TAG_NAME);
+        map.set(row.LECTURE_ID,lecture);
+    });
 
     connection.release();
 
-    return response(baseResponse.SUCCESS("해당 카테고리의 강의 목록 조회에 성공했습니다"),getResultList);
+    return Object.fromEntries(map);
+}
+
+exports.getMiddleLectureList = async function(topCategoryName,middleCategoryName){
+
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const getResultList = await lectureDao.selectMiddleLectureList(connection,topCategoryName,middleCategoryName);
+    const middleResult = await lectureDao.selectMiddleLecture(connection,topCategoryName,middleCategoryName);
+    console.log(middleResult);
+    // const tagResult = await lectureDao.selectMiddleLectureTag(connection,topCategoryName,middleCategoryName);
+
+    connection.release();
+    return getResultList
+
 }
 
 exports.checkUserLecture = async function (id, lectureId) {

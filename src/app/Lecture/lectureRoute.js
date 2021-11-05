@@ -16,5 +16,7 @@ module.exports = function(app){
 
     app.get('/inflearn/courses/lectures/:topCategoryName',lectures.getTopLectureList);
 
+    app.get('/inflearn/courses/lectures/:topCategoryName/:middleCategoryName',lectures.getMiddleLectureList);
+
 
 };

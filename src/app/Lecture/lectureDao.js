@@ -34,7 +34,7 @@ async function selectTopLectureList(connection,topCategoryName){
 
 async function selectLectureTag(connection){
     const lectureTagQuery = `
-    select  
+    select distinct
         LT.LECTURE_ID,MCT.CATEGORY_TAG_NAME 
     from LECTURES
     inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
@@ -58,6 +58,78 @@ async function selectLectureMiddle(connection){
     const [lectureMiddleResult] = await connection.query(lectureMiddleQuery);
 
     return lectureMiddleResult;
+}
+
+async function selectTopLectureMiddle(connection,topCategoryName) {
+
+    const lectureMiddleQuery = `
+    select distinct
+        LECTURE_ID,MIDDLE_CATEGORY_NAME 
+    from LECTURE_TAGS
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LECTURE_TAGS.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LECTURE_TAGS.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(lectureMiddleQuery,topCategoryName);
+    return resultRows;
+
+}
+
+async function selectTopLectureTag(connection,topCategoryName) {
+    const lectureTagQuery = `
+    select distinct 
+        LECTURE_ID, MCT.CATEGORY_TAG_NAME 
+    from LECTURE_TAGS
+    inner join MIDDLE_CATEGORY_TAGS MCT on LECTURE_TAGS.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LECTURE_TAGS.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LECTURE_TAGS.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(lectureTagQuery,topCategoryName);
+
+    return resultRows;
+}
+
+async function selectMiddleLectureList(connection,topCategoryName,middleCategoryName) {
+    const topMiddleLectureQuery = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(topMiddleLectureQuery,[topCategoryName,middleCategoryName]);
+    return resultRows;
+}
+
+async function selectMiddleLecture(connection,topCategoryName,middleCategoryName) {
+    const middleLectureQuery =`
+    select distinct 
+        LT.LECTURE_ID,MIDDLE_CATEGORY_NAME 
+    from LECTURE_TAGS LT
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
+    `;
+    const [resultRows] = await connection.query(
+        middleLectureQuery,
+        [topCategoryName,middleCategoryName]
+    );
+    return resultRows;
+}
+
+async function selectMiddleLectureTag(connection,topCategoryName,middleCategoryName) {
+    const tagLectureQuery = `
+    
+    `;
 }
 
 async function selectUserHaveLecture(connection, id, lectureId) {
@@ -234,6 +306,10 @@ module.exports = {
     selectLectureMiddle,
     selectLectureSession,
     selectSessionClasses,
-    selectTopLectureList
+    selectTopLectureList,
+    selectTopLectureMiddle,
+    selectTopLectureTag,
+    selectMiddleLectureList,
+    selectMiddleLecture
 
 };
