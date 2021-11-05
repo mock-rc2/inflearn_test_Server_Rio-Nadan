@@ -14,4 +14,6 @@ module.exports = function(app){
     app.get('/inflearn/lectures/:lectureId/curriculum', lectures.getSessionClasses);
 
     app.get('/inflearn/lectures/:lectureId/reviews', lectures.getLectureReviews);
+
+    app.post('/inflearn/lectures/:lectureId/reviews', jwtMiddleware, lectures.postLectureReview);
 };

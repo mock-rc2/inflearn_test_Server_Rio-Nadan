@@ -36,7 +36,7 @@ module.exports = {
     USER_REDUNDANT_PHONE_NUMBER: {"isSuccess": false, "code": 2020, "message": "중복된 휴대폰 번호 입니다"},
     USER_PHONE_NUMBER_EMPTY: {"isSuccess": false, "code": 2021, "message": "휴대폰 번호가 비어있습니다"},
     USER_PHONE_NUMBER_TYPE_ERROR:{"isSuccess": false, "code": 2022, "message": "잘못된 휴대폰 번호 양식입니다."},
-    LECTURE_NOT_EXISTENCE:{"isSuccess": false, "code": 2023, "message": "존재하지 않는 강의 잆니다"},
+    LECTURE_NOT_EXISTENCE:{"isSuccess": false, "code": 2023, "message": "존재하지 않는 강의 입니다"},
 
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
@@ -56,6 +56,7 @@ module.exports = {
     CHECK_USER_LECTURES_FAIL: { "isSuccess": false, "code": 3013, "message":"강의를 소유하지 않았습니다."},
     GET_LECTURE_INTRODUCTION_FAIL: { "isSuccess": false, "code": 3014, "message":"강의 소개 조회를 실패하였습니다."},
     GET_LECTURE_SESSION_FAIL: { "isSuccess": false, "code": 3015, "message":"강의 세션 조회를 실패하였습니다."},
+    INSERT_LECTURE_REVIEW_FAIL: { "isSuccess": false, "code": 3016, "message":"강의 리뷰 작성을 실패하였습니다."},
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

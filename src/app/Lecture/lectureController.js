@@ -89,3 +89,24 @@ exports.getLectureReviews = async function(req, res) {
 
     return res.send(response(baseResponse.SUCCESS("강의 리뷰 조회 성공"), lectureReviews));
 }
+
+exports.postLectureReview = async function(req, res) {
+    const token = req.verifiedToken;
+    const lectureId = req.params['lectureId'];
+    const userId = token.userId;
+    const {starPoint, review} = req.body;
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+
+    const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+    
+    if(checkUserLecture.length < 1)
+        return res.send(errResponse(baseResponse.CHECK_USER_LECTURES_FAIL));
+
+    const insertReviewResult = await lectureService.postLectureReview(lectureId, userId, starPoint, review);
+
+    return res.send(insertReviewResult);
+}

@@ -60,3 +60,26 @@ exports.getSessionClasses = async function (lectureId) {
     }
 }
 
+exports.postLectureReview = async function(lectureId, userId, starPoint, review) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try{
+        const reviewParams = [lectureId, userId, starPoint, review];
+
+        const insertReviewResult = await lectureDao.insertLectureReview(connection, reviewParams);
+
+        // 업데이트 검증
+        if (insertReviewResult.affectedRows == 0) {
+            await connection.rollback();
+            return errResponse(baseResponse.INSERT_LECTURE_REVIEW_FAIL);
+        }
+
+        return response(baseResponse.SUCCESS("리뷰 작성 성공"));
+    }catch (err){
+        await connection.rollback();
+        logger.error(`App - getSessionClasses Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    }finally {
+        connection.release();
+    }
+}
+

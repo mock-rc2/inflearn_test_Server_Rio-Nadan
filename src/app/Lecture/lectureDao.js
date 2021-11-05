@@ -218,6 +218,21 @@ async function selectLectureReviews(connection, lectureId) {
 
     return resultRows;
 }
+
+async function insertLectureReview(connection, reviewParams) {
+    const insertLectureReview = `
+        INSERT INTO LECTURE_REVIEWS(LECTURE_ID, USER_ID, STAR_POINT, REVIEW_COMMENT)
+        VALUES (?, ?, ?, ?);
+    `;
+
+    const result = await connection.query(
+        insertLectureReview,
+        reviewParams
+    );
+
+    return result;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -234,5 +249,6 @@ module.exports = {
 
     selectLectureSession,
     selectSessionClasses,
-    selectLectureReviews
+    selectLectureReviews,
+    insertLectureReview
 };
