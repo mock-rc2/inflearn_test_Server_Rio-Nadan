@@ -202,6 +202,81 @@ async function selectSessionClasses(connection, lectureId) {
     return resultRows;
 }
 
+async function selectLectureReviews(connection, lectureId) {
+    const selectLectureReviewQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectLectureReviewQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function insertLectureReview(connection, reviewParams) {
+    const insertLectureReview = `
+        INSERT INTO LECTURE_REVIEWS(LECTURE_ID, USER_ID, STAR_POINT, REVIEW_COMMENT)
+        VALUES (?, ?, ?, ?);
+    `;
+
+    const result = await connection.query(
+        insertLectureReview,
+        reviewParams
+    );
+
+    return result;
+}
+
+async function updateLectureReview(connection, starPoint, review, reviewId) {
+    const updateLectureReviewQuery = `
+        UPDATE LECTURE_REVIEWS
+        SET STAR_POINT = ?, REVIEW_COMMENT = ?
+        WHERE LECTURE_REVIEW_ID = ?;
+    `;
+
+    const updateLectureRows = await connection.query(
+        updateLectureReviewQuery,
+        [starPoint, review, reviewId]
+    )
+
+    return updateLectureRows;
+}
+
+async function selectUserLectureReview(connection, userId, reviewId) {
+    const selectUserLectureReviewQuery = `
+        SELECT LECTURE_REVIEW_ID
+        FROM LECTURE_REVIEWS
+        WHERE USER_ID = ? AND LECTURE_REVIEW_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectUserLectureReviewQuery,
+        [userId, reviewId]
+    );
+
+    return resultRows;
+}
+
+async function deleteUserReview(connection, reviewId){
+    const deleteUserReviewQuery = `
+        DELETE FROM LECTURE_REVIEWS WHERE LECTURE_REVIEW_ID = ?;
+    `;
+
+    const deleteUserReviewResult = await connection.query(
+        deleteUserReviewQuery,
+        reviewId
+    );
+
+    return deleteUserReviewResult;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -217,5 +292,10 @@ module.exports = {
     selectLectureMiddle,
 
     selectLectureSession,
-    selectSessionClasses
+    selectSessionClasses,
+    selectLectureReviews,
+    insertLectureReview,
+    updateLectureReview,
+    selectUserLectureReview,
+    deleteUserReview
 };
