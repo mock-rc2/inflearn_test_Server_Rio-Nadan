@@ -202,6 +202,22 @@ async function selectSessionClasses(connection, lectureId) {
     return resultRows;
 }
 
+async function selectLectureReviews(connection, lectureId) {
+    const selectLectureReviewQuery = `
+        SELECT USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectLectureReviewQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -217,5 +233,6 @@ module.exports = {
     selectLectureMiddle,
 
     selectLectureSession,
-    selectSessionClasses
+    selectSessionClasses,
+    selectLectureReviews
 };

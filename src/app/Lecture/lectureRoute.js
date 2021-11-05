@@ -12,4 +12,6 @@ module.exports = function(app){
     app.get('/inflearn/lectures/:lectureId/introduction', lectures.getLectureIntroduction);
 
     app.get('/inflearn/lectures/:lectureId/curriculum', lectures.getSessionClasses);
+
+    app.get('/inflearn/lectures/:lectureId/reviews', lectures.getLectureReviews);
 };

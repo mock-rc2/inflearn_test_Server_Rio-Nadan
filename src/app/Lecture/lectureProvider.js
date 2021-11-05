@@ -159,3 +159,13 @@ exports.selectSessionClasses = async function (sessionId) {
 
     return selectClasses;
 }
+
+exports.selectLectureReviews = async function (lectureId) {
+    const connection =  await pool.getConnection(async (conn) => conn);
+    const selectReviews = await lectureDao.selectLectureReviews(connection, lectureId);
+    connection.release();
+
+    if(!selectReviews) return [];
+
+    return selectReviews;
+}

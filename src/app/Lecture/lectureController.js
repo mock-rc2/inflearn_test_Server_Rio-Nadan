@@ -76,3 +76,16 @@ exports.getSessionClasses = async function(req, res) {
 
     return res.send(sessionClasses);
 }
+
+exports.getLectureReviews = async function(req, res) {
+    const lectureId = req.params['lectureId'];
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+
+    const lectureReviews = await lectureProvider.selectLectureReviews(lectureId);
+
+    return res.send(response(baseResponse.SUCCESS("강의 리뷰 조회 성공"), lectureReviews));
+}
