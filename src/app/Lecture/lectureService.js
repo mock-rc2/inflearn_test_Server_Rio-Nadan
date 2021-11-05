@@ -42,3 +42,21 @@ exports.getLectureHeader = async function(lectureId) {
         return errResponse(baseResponse.SERVER_ERROR);
     }
 }
+
+exports.getSessionClasses = async function (lectureId) {
+    try{
+        let sessionRows = await lectureProvider.selectLectureSessions(lectureId);
+
+        if(!sessionRows) return errResponse(baseResponse.GET_LECTURE_SESSION_FAIL);
+
+        for(let i = 0; i<sessionRows.length; i++) {
+            sessionRows[i].CLASS = await lectureProvider.selectSessionClasses(sessionRows[i].SESSION_ID);
+        }
+
+        return response(baseResponse.SUCCESS("강의 세션의 클래스 조회 성공"), sessionRows);
+    } catch (err) {
+        logger.error(`App - getSessionClasses Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    }
+}
+
