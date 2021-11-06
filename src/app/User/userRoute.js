@@ -18,7 +18,7 @@ module.exports = function(app){
 
     app.patch('/inflearn/users/phonenumber',jwtMiddleware, user.editPhoneNumber);
 
-    app.post('/inflearn/users/token/issuance', user.userTokenIssuance);
+    app.get('/inflearn/users/token/issuance', user.userTokenIssuance);
 
     // 소셜 로그인 API CORS 오류로 인한 보류
     // app.get('/inflearn/users/oauth/login',user.oauthKakaoLogin);

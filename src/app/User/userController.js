@@ -171,7 +171,7 @@ exports.editPhoneNumber = async function (req, res) {
 }
 
 exports.userTokenIssuance = async function (req, res) {
-    const token = req.body.refreshToken;
+    const token = req.headers['x-refresh-token'];
 
     if(!token) return res.send(errResponse(baseResponse.USER_TOKEN_EMPTY));
 
