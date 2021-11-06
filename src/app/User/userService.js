@@ -288,3 +288,28 @@ exports.editPhoneNumber = async function (id, phoneNumber) {
         connection.release();
     }
 }
+
+exports.jwtTokenIssuance = async function(token) {
+
+    const tokenCheckRow = await userProvider.refreshTokenCheck(token);
+
+    if(tokenCheckRow.length < 1)
+        return errResponse(baseResponse.USER_TOKEN_NOT_EXISTENCE);
+
+    const userId = tokenCheckRow[0].USER_ID;
+
+    //토큰 생성 Service
+    let jwtToken = await jwt.sign(
+        {
+            userId: userId,
+            message: "login",
+        }, // 토큰의 내용(payload)
+        secret_config.jwtsecret, // 비밀키
+        {
+            expiresIn: "6h",
+            subject: "userInfo",
+        }
+    );
+    return response(baseResponse.SUCCESS("토큰 발급 성공"), {'userId': userId, 'jwt': jwtToken});
+
+}

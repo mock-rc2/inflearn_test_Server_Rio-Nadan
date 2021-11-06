@@ -170,6 +170,16 @@ exports.editPhoneNumber = async function (req, res) {
     return res.send(userEditPhoneResult);
 }
 
+exports.userTokenIssuance = async function (req, res) {
+    const token = req.body.refreshToken;
+
+    if(!token) return res.send(errResponse(baseResponse.USER_TOKEN_EMPTY));
+
+    const jwtIssuance = await userService.jwtTokenIssuance(token);
+
+    return res.send(jwtIssuance);
+}
+
 /** JWT 토큰 검증 API
  * [GET] /app/auto-login
  */
