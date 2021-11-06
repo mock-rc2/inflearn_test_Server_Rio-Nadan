@@ -143,6 +143,16 @@ async function selectUserNickName(connection, nickName) {
   return resultRow;
 }
 
+async function selectUserToken(connection, token) {
+  const selectTokenQuery = `
+    SELECT USER_ID, USER_REFRESH_TOKEN
+    FROM USERS
+    WHERE USER_REFRESH_TOKEN = ?;
+  `;
+  const [selectTokenRow] = await connection.query(selectTokenQuery, token);
+  return selectTokenRow;
+}
+
 
 module.exports = {
   selectUser,
@@ -156,5 +166,6 @@ module.exports = {
   updateUserEmail,
   updateUserPhoneNumber,
   selectUserPhoneNumber,
-  selectUserNickName
+  selectUserNickName,
+  selectUserToken
 };

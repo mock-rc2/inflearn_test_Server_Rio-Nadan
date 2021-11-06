@@ -18,5 +18,12 @@ module.exports = function(app){
 
     app.get('/inflearn/courses/lectures/:topCategoryName/:middleCategoryName',lectures.getMiddleLectureList);
 
+    app.get('/inflearn/lectures/:lectureId/reviews', lectures.getLectureReviews);
+
+    app.post('/inflearn/lectures/:lectureId/reviews', jwtMiddleware, lectures.postLectureReview);
+
+    app.put('/inflearn/lectures/:lectureId/reviews/:reviewId', jwtMiddleware, lectures.putLectureReview);
+
+    app.delete('/inflearn/lectures/:lectureId/reviews/:reviewId',jwtMiddleware, lectures.deleteLectureReview);
 
 };

@@ -9,16 +9,21 @@ const {query} = require("winston");
 
 
 
-exports.getAllLectureList = async function() {
+exports.getAllLectureList = async function(tagName) {
     const connection = await pool.getConnection(async (conn) => conn);
+
+    let tag = tagName.split(',');
+    console.log(tag[0]); // Java
+
+if(!tagName) {
 
     const resultList = await lectureDao.selectLectureList(connection);
     const tagResult = await lectureDao.selectLectureTag(connection);
     const middleResult = await lectureDao.selectLectureMiddle(connection);
-    // console.log(tagResult);
-    // console.log(middleResult);
 
     let map = new Map();
+
+    console.log(typeof (resultList));
 
     //console.log("쌩 map: " + map); // => 쌩 map: [object Map]
     // [{id:1,name:스프링 강의},{id:2,name: 디자인 패턴 강의}]
@@ -65,13 +70,38 @@ exports.getAllLectureList = async function() {
         map.set(row.LECTURE_ID, lecture);
         // console.log(lecture);
     });
+}else{
+    const resultListWithTag = await lectureDao.selectLectureListWithTag(connection);
+    const middleResultWithTag = await lectureDao.selectLectureMiddleWithTag(connection);
+    const tagResultWithTag = await lectureDao.selectLectureTagWithTag(connection);
 
-    // console.log(map);
+
+}
+ /*   // console.log(map);
+
+    map.forEach(function(row){
+        row.filter(function(v){
+            console.log(row);
+            // v.TAG === 'Java';
+        })
+
+    })
+
+    // console.log(typeof (map));
+    //
+     let resultRow = Object.fromEntries(map);
+    // console.log(resultRow);
+    //
+    // console.log(typeof (Array.from(resultRow)));*/
+
+
+
+
 
 
     connection.release();
 
-    return Object.fromEntries(map);
+    return resultRow;
 }
 
 exports.getLectureList = async function(topCategoryName){
@@ -210,4 +240,22 @@ exports.selectSessionClasses = async function (sessionId) {
     if(!selectClasses) return [];
 
     return selectClasses;
+}
+
+exports.selectLectureReviews = async function (lectureId) {
+    const connection =  await pool.getConnection(async (conn) => conn);
+    const selectReviews = await lectureDao.selectLectureReviews(connection, lectureId);
+    connection.release();
+
+    if(!selectReviews) return [];
+
+    return selectReviews;
+}
+
+exports.checkUserLectureReview = async function (userId, reviewId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectUserReview = await lectureDao.selectUserLectureReview(connection, userId, reviewId);
+    connection.release();
+
+    return selectUserReview;
 }

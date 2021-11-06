@@ -15,6 +15,25 @@ async function selectLectureList (connection){
     return lectureListResult;
 }
 
+async function selectLectureListWithTag(connection,tagString){
+    const lectureListQueryWithTag = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,
+        LEARNING_LEVEL,LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    inner join MIDDLE_CATEGORY_TAGS MCT on LT.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
+        where ?;
+    `;
+
+    const [resultRow] = await connection.query(lectureListQueryWithTag,tagString);
+
+    return resultRow;
+}
+
 async function selectTopLectureList(connection,topCategoryName){
     const topLectureListQuery = `
     select distinct 
@@ -46,6 +65,12 @@ async function selectLectureTag(connection){
     return lectureTagResult;
 }
 
+async function selectLectureTagWithTag(connection,tagString) {
+    const lectureTagQueryWithTag = `
+    
+    `;
+}
+
 async function selectLectureMiddle(connection){
     const lectureMiddleQuery = `
     select distinct 
@@ -58,6 +83,23 @@ async function selectLectureMiddle(connection){
     const [lectureMiddleResult] = await connection.query(lectureMiddleQuery);
 
     return lectureMiddleResult;
+}
+
+async function selectLectureMiddleWithTag(connection,tagString){
+    const lectureMiddleQueryWithTag = `
+    select distinct 
+        LT.LECTURE_ID,LMC.MIDDLE_CATEGORY_NAME 
+    from LECTURE_TAGS LT
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join (select LECTURE_ID,CATEGORY_TAG_NAME from LECTURE_TAGS
+    inner join MIDDLE_CATEGORY_TAGS MCT on LECTURE_TAGS.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID) sub on sub.LECTURE_ID = LT.LECTURE_ID
+        where CATEGORY_TAG_NAME = 'Java' or CATEGORY_TAG_NAME = 'Back-End'
+        order by LECTURE_ID asc;
+    `;
+
+    const [resultRows] = await connection.query(lectureMiddleQueryWithTag,tagString);
+
+    return resultRows;
 }
 
 async function selectTopLectureMiddle(connection,topCategoryName) {
@@ -291,6 +333,81 @@ async function selectSessionClasses(connection, lectureId) {
     return resultRows;
 }
 
+async function selectLectureReviews(connection, lectureId) {
+    const selectLectureReviewQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectLectureReviewQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function insertLectureReview(connection, reviewParams) {
+    const insertLectureReview = `
+        INSERT INTO LECTURE_REVIEWS(LECTURE_ID, USER_ID, STAR_POINT, REVIEW_COMMENT)
+        VALUES (?, ?, ?, ?);
+    `;
+
+    const result = await connection.query(
+        insertLectureReview,
+        reviewParams
+    );
+
+    return result;
+}
+
+async function updateLectureReview(connection, starPoint, review, reviewId) {
+    const updateLectureReviewQuery = `
+        UPDATE LECTURE_REVIEWS
+        SET STAR_POINT = ?, REVIEW_COMMENT = ?
+        WHERE LECTURE_REVIEW_ID = ?;
+    `;
+
+    const updateLectureRows = await connection.query(
+        updateLectureReviewQuery,
+        [starPoint, review, reviewId]
+    )
+
+    return updateLectureRows;
+}
+
+async function selectUserLectureReview(connection, userId, reviewId) {
+    const selectUserLectureReviewQuery = `
+        SELECT LECTURE_REVIEW_ID
+        FROM LECTURE_REVIEWS
+        WHERE USER_ID = ? AND LECTURE_REVIEW_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectUserLectureReviewQuery,
+        [userId, reviewId]
+    );
+
+    return resultRows;
+}
+
+async function deleteUserReview(connection, reviewId){
+    const deleteUserReviewQuery = `
+        DELETE FROM LECTURE_REVIEWS WHERE LECTURE_REVIEW_ID = ?;
+    `;
+
+    const deleteUserReviewResult = await connection.query(
+        deleteUserReviewQuery,
+        reviewId
+    );
+
+    return deleteUserReviewResult;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -306,10 +423,17 @@ module.exports = {
     selectLectureMiddle,
     selectLectureSession,
     selectSessionClasses,
+
     selectTopLectureList,
     selectTopLectureMiddle,
     selectTopLectureTag,
     selectMiddleLectureList,
-    selectMiddleLecture
+    selectMiddleLecture,
+
+    selectLectureReviews,
+    insertLectureReview,
+    updateLectureReview,
+    selectUserLectureReview,
+    deleteUserReview
 
 };
