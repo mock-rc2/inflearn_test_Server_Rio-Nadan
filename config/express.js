@@ -2,6 +2,7 @@ const express = require('express');
 const compression = require('compression');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
+const path = require('path')
 var cors = require('cors');
 module.exports = function () {
     const app = express();
@@ -26,6 +27,8 @@ module.exports = function () {
     require('../src/app/User/userRoute')(app);
 
     require('../src/app/Lecture/lectureRoute')(app);
+
+    require('../src/indexRoute')(app);
 
     return app;
 };

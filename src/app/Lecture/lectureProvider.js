@@ -6,6 +6,7 @@ const {errResponse} = require("../../../config/response");
 const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
 const {query} = require("winston");
+const {checkLectureUser} = require("./lectureProvider");
 
 
 exports.getLectureList = async function() {
@@ -176,4 +177,28 @@ exports.checkUserLectureReview = async function (userId, reviewId) {
     connection.release();
 
     return selectUserReview;
+}
+
+exports.selectLectureNotice = async function (lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectLectureNoticeResult = await lectureDao.selectLectureNotice(connection, lectureId);
+    connection.release();
+
+    return selectLectureNoticeResult;
+}
+
+exports.checkLectureUser = async function (userId, lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectLectureUser = await lectureDao.selectLectureUser(connection, userId, lectureId);
+    connection.release();
+
+    return selectLectureUser;
+}
+
+exports.checkUserLectureNotice = async function (noticeId, userId){
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectUserLectureNotice = await lectureDao.selectLectureNoticeUser(connection, noticeId, userId);
+    connection.release();
+
+    return selectUserLectureNotice;
 }
