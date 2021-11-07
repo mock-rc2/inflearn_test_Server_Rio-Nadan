@@ -277,6 +277,77 @@ async function deleteUserReview(connection, reviewId){
     return deleteUserReviewResult;
 }
 
+async function selectLectureNotice(connection, lectureId) {
+    const selectLectureNoticeQuery = `
+        SELECT NOTICE_ID, NOTICE_TITLE, NOTICE_CONTENT, DATE_FORMAT(CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_NOTICE
+        WHERE LECTURE_ID = ?
+    `;
+
+    const [selectUserLectureRows] = await connection.query(
+        selectLectureNoticeQuery,
+        lectureId
+    );
+
+    return selectUserLectureRows;
+}
+
+async function insertLectureNotice(connection, lectureNoticeParams) {
+    const insertLectureNoticeQuery  = `
+        INSERT INTO LECTURE_NOTICE(LECTURE_ID, USER_ID, NOTICE_TITLE, NOTICE_CONTENT) VALUES (?, ?, ?, ?);
+    `;
+
+    const insertLectureRow = await connection.query(
+        insertLectureNoticeQuery,
+        lectureNoticeParams
+    )
+
+    return insertLectureRow;
+}
+
+async function selectLectureUser(connection, userId, lectureId){
+    const selectLectureUserQuery = `
+        SELECT USER_ID
+        FROM LECTURES
+        WHERE USER_ID = ? AND LECTURE_ID = ?
+    `;
+
+    const [selectLectureUserResult] = await connection.query(
+        selectLectureUserQuery,
+        [userId, lectureId]
+    );
+
+    return selectLectureUserResult;
+}
+
+async function updateLectureNotice(connection, lectureNoticeParams) {
+    const updateLectureQuery = `
+        UPDATE LECTURE_NOTICE
+        SET NOTICE_TITLE = ?, NOTICE_CONTENT = ?
+        WHERE NOTICE_ID = ?;
+    `;
+
+    const updateLectureResult = await connection.query(
+        updateLectureQuery,
+        lectureNoticeParams
+    )
+
+    return updateLectureResult;
+}
+
+async function deleteLectureNotice(connection, noticeId) {
+    const deleteNoticeQuery = `
+        DELETE FROM LECTURE_NOTICE WHERE NOTICE_ID = ?;
+    `;
+
+    const deleteNoticeResult = await connection.query(
+        deleteNoticeQuery,
+        noticeId
+    );
+
+    return deleteNoticeResult;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -297,5 +368,10 @@ module.exports = {
     insertLectureReview,
     updateLectureReview,
     selectUserLectureReview,
-    deleteUserReview
+    deleteUserReview,
+    selectLectureNotice,
+    insertLectureNotice,
+    selectLectureUser,
+    updateLectureNotice,
+    deleteLectureNotice
 };
