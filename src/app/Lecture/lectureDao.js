@@ -34,7 +34,7 @@ async function selectLectureListWithTag(connection,tagString){
     return resultRow;
 }
 
-async function selectTopLectureList(connection,topCategoryName){
+async function selectTopLectureList(connection,bigCategoryName){
     const topLectureListQuery = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
@@ -47,7 +47,7 @@ async function selectTopLectureList(connection,topCategoryName){
     where BIG_CATEGORY_NAME = ?;
     `;
 
-    const [resultRows] = await connection.query(topLectureListQuery,topCategoryName);
+    const [resultRows] = await connection.query(topLectureListQuery,bigCategoryName);
     return resultRows;
 }
 

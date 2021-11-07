@@ -14,7 +14,7 @@ module.exports = function(app){
 
     app.get('/inflearn/lectures/:lectureId/curriculum', lectures.getSessionClasses);
 
-    app.get('/inflearn/courses/lectures/:topCategoryName',lectures.getTopLectureList);
+    app.get('/inflearn/courses/lectures/:bigCategoryName',lectures.getBigLectureList);
 
     app.get('/inflearn/courses/lectures/:topCategoryName/:middleCategoryName',lectures.getMiddleLectureList);
 

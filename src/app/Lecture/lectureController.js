@@ -26,18 +26,22 @@ exports.getAllLectureList = async function(req,res){
 /**
  * API No.
  * API Name : TOP 카테고리 별 강의 조회 API
- * [GET] /inflearn/courses/lectures/{topCategoryName}
+ * [GET] /inflearn/courses/lectures/{bigCategoryName}
  */
-exports.getTopLectureList = async function(req,res){
+exports.getBigLectureList = async function(req,res){
     /**
-     * Path Variable(타겟이 있는경우): topCategoryName
+     * Path Variable(타겟이 있는경우): bigCategoryName
+     * Query String : tagName
      */
-    const topCategoryName = req.params.topCategoryName;
+    const bigCategoryName = req.params.bigCategoryName;
+    const tagName = req.query.skill;
 
-    if(!topCategoryName)
+    console.log(bigCategoryName);
+    console.log(tagName);
+    if(!bigCategoryName)
         return res.redirect('/inflearn/courses/lectures');
 
-    const lectureResult = await lectureProvider.getLectureList(topCategoryName);
+    const lectureResult = await lectureProvider.getLectureList(bigCategoryName,tagName);
 
     return res.send(lectureResult);
 }
