@@ -348,6 +348,29 @@ async function deleteLectureNotice(connection, noticeId) {
     return deleteNoticeResult;
 }
 
+async function selectLectureInfo(connection, lectureId) {
+    const selectLectureInfoQuery = `
+    SELECT L.PRICE, U.NICK_NAME, CLASS_INFO.CNT AS CLASS_COUNT, CLASS_INFO.LECTURE_TIME AS TOTAL_TIME, L.LEARNING_LEVEL
+    FROM LECTURES AS L 
+    INNER JOIN USERS AS U
+        ON L.USER_ID = U.USER_ID
+    INNER JOIN (SELECT S.LECTURE_ID AS LECTURE_ID, COUNT(C.CLASS_ID) AS CNT, 
+            SEC_TO_TIME(SUM(TIME_TO_SEC(S.SESSION_TOTAL_TIME)))AS LECTURE_TIME
+                FROM LECTURE_SESSION AS S
+                    INNER JOIN LECTURE_CLASSES AS C
+                        ON S.SESSION_ID = C.SESSION_ID
+                GROUP BY S.LECTURE_ID) AS CLASS_INFO
+        ON L.LECTURE_ID = CLASS_INFO.LECTURE_ID
+    WHERE L.LECTURE_ID = ?;
+    `;
+
+    const [resultRow] = await connection.query(
+        selectLectureInfoQuery,
+        lectureId
+    );
+
+    return resultRow;
+}
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -373,5 +396,6 @@ module.exports = {
     insertLectureNotice,
     selectLectureUser,
     updateLectureNotice,
-    deleteLectureNotice
+    deleteLectureNotice,
+    selectLectureInfo
 };

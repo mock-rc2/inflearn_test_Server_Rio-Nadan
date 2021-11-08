@@ -28,4 +28,6 @@ module.exports = function(app){
     app.put('/inflearn/lectures/:lectureId/notice/:noticeId', jwtMiddleware, lectures.putLectureNotice);
 
     app.delete('/inflearn/lectures/:lectureId/notice/:noticeId', jwtMiddleware, lectures.deleteLectureNotice);
+
+    app.get('/inflearn/lectures/:lectureId/info', lectures.getLectureInfo);
 };

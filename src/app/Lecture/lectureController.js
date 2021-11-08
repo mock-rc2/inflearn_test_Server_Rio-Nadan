@@ -257,3 +257,19 @@ exports.deleteLectureNotice = async function(req, res){
 
     return res.send(deleteLectureResult);
 }
+
+exports.getLectureInfo = async function(req, res){
+    const lectureId = req.params['lectureId'];
+
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
+
+    const getLectureInfoResult = await lectureProvider.selectLectureInfo(lectureId);
+    console.log('test', getLectureInfoResult);
+    return res.send(response(baseResponse.SUCCESS("조회 성공 하였습니다."), getLectureInfoResult));
+}
