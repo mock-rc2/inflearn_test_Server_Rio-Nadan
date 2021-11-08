@@ -348,6 +348,64 @@ async function deleteLectureNotice(connection, noticeId) {
     return deleteNoticeResult;
 }
 
+
+async function selectReviewsCreatedSort(connection, lectureId) {
+    const selectReviewsCreatedSortQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?
+        ORDER BY REVIEW.CREATED_AT ASC;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectReviewsCreatedSortQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function selectReviewsHighGPA(connection, lectureId) {
+    const selectReviewsHighGPAQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?
+        ORDER BY REVIEW.STAR_POINT DESC;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectReviewsHighGPAQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function selectReviewsLowGPA(connection, lectureId) {
+    const selectReviewsLowGPAQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?
+        ORDER BY REVIEW.STAR_POINT ASC;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectReviewsLowGPAQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -373,5 +431,9 @@ module.exports = {
     insertLectureNotice,
     selectLectureUser,
     updateLectureNotice,
-    deleteLectureNotice
+    deleteLectureNotice,
+
+    selectReviewsCreatedSort,
+    selectReviewsHighGPA,
+    selectReviewsLowGPA
 };
