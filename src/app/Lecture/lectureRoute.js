@@ -5,7 +5,6 @@ module.exports = function(app){
     // 강의 목록 API 브런치 따서 작업하면 됌
     app.get('/inflearn/courses/lectures', lectures.getAllLectureList);
 
-
     app.get('/inflearn/lectures/:lectureId/check', jwtMiddleware, lectures.getUserLecture);
 
     app.get('/inflearn/lectures/:lectureId/header', lectures.getLectureHeaderItems);
@@ -16,7 +15,7 @@ module.exports = function(app){
 
     app.get('/inflearn/courses/lectures/:bigCategoryName',lectures.getBigLectureList);
 
-    app.get('/inflearn/courses/lectures/:topCategoryName/:middleCategoryName',lectures.getMiddleLectureList);
+    app.get('/inflearn/courses/lectures/:bigCategoryName/:middleCategoryName',lectures.getMiddleLectureList);
 
     app.get('/inflearn/lectures/:lectureId/reviews', lectures.getLectureReviews);
 

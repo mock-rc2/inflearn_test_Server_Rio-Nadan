@@ -41,6 +41,10 @@ module.exports = {
     USER_REVIEW_NOT_EXIST:{"isSuccess": false, "code": 2025, "message": "작성한 리뷰가 없습니다."},
     LECTURE_ID_REVIEW_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
     USER_TOKEN_EMPTY:{"isSuccess": false, "code": 2027, "message": "토큰이 비어 있습니다."},
+
+    // Nadan
+    CATEGORY_NOT_EXIST : {"isSuccess": false, "code": 2031, "message": "존재하지 않는 카테고리입니다."},
+
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3002, "message":"중복된 닉네임입니다." },

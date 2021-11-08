@@ -36,10 +36,14 @@ exports.getBigLectureList = async function(req,res){
     const bigCategoryName = req.params.bigCategoryName;
     const tagName = req.query.skill;
 
-    console.log(bigCategoryName);
-    console.log(tagName);
     if(!bigCategoryName)
         return res.redirect('/inflearn/courses/lectures');
+
+    const isExist = await lectureProvider.checkBigCategoryList(bigCategoryName);
+
+    if(isExist.length < 1)
+        return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
+
 
     const lectureResult = await lectureProvider.getLectureList(bigCategoryName,tagName);
 
@@ -48,22 +52,30 @@ exports.getBigLectureList = async function(req,res){
 
 /**
  * API No.
- * API Name : TOP 카테고리 별 강의 조회 API
- * [GET] /inflearn/courses/lectures/{topCategoryName}/{middleCategoryName}
+ * API Name : middle 카테고리 별 강의 조회 API
+ * [GET] /inflearn/courses/lectures/{bigCategoryName}/{middleCategoryName}
  */
 exports.getMiddleLectureList = async function(req,res){
     /**
-     * Path Variable(타겟이 있는경우): topCategoryName,middleCategoryName
+     * Path Variable(타겟이 있는경우): bigCategoryName,middleCategoryName
+     * Query String : tagName
      */
-    const topCategoryName = req.params.topCategoryName;
+    const bigCategoryName = req.params.bigCategoryName;
     const middleCategoryName = req.params.middleCategoryName;
 
-    if(!topCategoryName)
+    const tagName = req.query.skill;
+
+    if(!bigCategoryName)
         return res.redirect('/inflearn/courses/lectures');
     else if(!middleCategoryName)
-        return res.redirect('/inflearn/courses/lectures/:topCategoryName')
+        return res.redirect('/inflearn/courses/lectures/:bigCategoryName')
 
-    const lectureResult = await lectureProvider.getMiddleLectureList(topCategoryName,middleCategoryName);
+    const isExist = await lectureProvider.checkMiddleCategoryList(bigCategoryName,middleCategoryName,tagName);
+
+    if(isExist.length < 1)
+        return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
+
+    const lectureResult = await lectureProvider.getMiddleLectureList(bigCategoryName,middleCategoryName);
 
     return res.send(lectureResult);
 }
