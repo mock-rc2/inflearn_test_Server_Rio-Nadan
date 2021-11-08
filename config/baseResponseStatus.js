@@ -39,7 +39,7 @@ module.exports = {
     LECTURE_NOT_EXISTENCE:{"isSuccess": false, "code": 2023, "message": "존재하지 않는 강의 입니다"},
     LECTURE_REVIEW_EMPTY:{"isSuccess": false, "code": 2024, "message": "리뷰가 비어있습니다."},
     USER_REVIEW_NOT_EXIST:{"isSuccess": false, "code": 2025, "message": "작성한 리뷰가 없습니다."},
-    LECTURE_ID_REVIEW_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
+    LECTURE_ID_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
     USER_TOKEN_EMPTY:{"isSuccess": false, "code": 2027, "message": "토큰이 비어 있습니다."},
     LECTURE_NOTICE_TITLE_EMPTY:{"isSuccess": false, "code": 2028, "message": "공지 제목이 비어있습니다."},
 
@@ -69,7 +69,7 @@ module.exports = {
 
     INSERT_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3041, "message":"강의 공지 작성을 실패하였습니다."},
     UPDATE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 수정을 실패하였습니다."},
-    DELETE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 삭제를 실패하였습니다."},
+    DELETE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3043, "message":"강의 공지 삭제를 실패하였습니다."},
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

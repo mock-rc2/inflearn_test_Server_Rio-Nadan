@@ -27,7 +27,7 @@ exports.getUserLecture = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -43,7 +43,7 @@ exports.getLectureHeaderItems = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -59,7 +59,7 @@ exports.getLectureIntroduction = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -77,7 +77,7 @@ exports.getSessionClasses = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -91,16 +91,34 @@ exports.getSessionClasses = async function(req, res) {
 
 exports.getLectureReviews = async function(req, res) {
     const lectureId = req.params['lectureId'];
+    const sortQuery = req.query.sort;
+    let lectureReviews;
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     if(checkLectureRow.length < 1)
         return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
 
-    const lectureReviews = await lectureProvider.selectLectureReviews(lectureId);
+    if(!sortQuery){
+        lectureReviews = await lectureProvider.selectLectureReviews(lectureId);
+    }else {
+        switch (sortQuery) {
+            case 'created':
+                lectureReviews = await lectureProvider.selectReviewCreatedSort(lectureId);
+                break;
+
+            case 'highGPA':
+                lectureReviews = await lectureProvider.selectReviewHighGPA(lectureId);
+                break;
+
+            case 'lowGPA':
+                lectureReviews = await lectureProvider.selectReviewLowGPA(lectureId);
+                break;
+        }
+    }
 
     return res.send(response(baseResponse.SUCCESS("강의 리뷰 조회 성공"), lectureReviews));
 }
@@ -161,7 +179,7 @@ exports.deleteLectureReview = async function(req, res) {
     const userId = token.userId;
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -182,7 +200,7 @@ exports.getLectureNotice = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -201,7 +219,7 @@ exports.postLectureNotice = async function(req, res) {
     const {title, content} = req.body;
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     if(!title)
         return res.send(errResponse(baseResponse.LECTURE_NOTICE_TITLE_EMPTY));
@@ -224,7 +242,7 @@ exports.putLectureNotice = async function(req, res){
     const {title, content} = req.body;
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     if(!title)
         return res.send(errResponse(baseResponse.LECTURE_NOTICE_TITLE_EMPTY));
@@ -246,7 +264,7 @@ exports.deleteLectureNotice = async function(req, res){
     const userId = token.userId;
 
     if(!lectureId)
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 

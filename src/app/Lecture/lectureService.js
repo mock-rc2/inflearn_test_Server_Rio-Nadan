@@ -141,7 +141,7 @@ exports.insertLectureNotice = async function(lectureId, userId, noticeTitle, not
             return errResponse(baseResponse.INSERT_LECTURE_NOTICE_FAIL);
         }
 
-        return response(baseResponse.SUCCESS("강의 작성을 성공하였습니다."));
+        return response(baseResponse.SUCCESS("강의 공지 작성을 성공하였습니다."));
     } catch (err){
         await connection.rollback();
         logger.error(`App - insertLectureNotice Service error\n: ${err.message}`);
