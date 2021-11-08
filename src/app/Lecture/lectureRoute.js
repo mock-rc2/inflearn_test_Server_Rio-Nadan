@@ -13,6 +13,10 @@ module.exports = function(app){
 
     app.get('/inflearn/lectures/:lectureId/curriculum', lectures.getSessionClasses);
 
+    app.get('/inflearn/courses/lectures/:bigCategoryName',lectures.getBigLectureList);
+
+    app.get('/inflearn/courses/lectures/:bigCategoryName/:middleCategoryName',lectures.getMiddleLectureList);
+
     app.get('/inflearn/lectures/:lectureId/reviews', lectures.getLectureReviews);
 
     app.post('/inflearn/lectures/:lectureId/reviews', jwtMiddleware, lectures.postLectureReview);
@@ -31,3 +35,4 @@ module.exports = function(app){
 
     app.get('/inflearn/lectures/:lectureId/info', lectures.getLectureInfo);
 };
+

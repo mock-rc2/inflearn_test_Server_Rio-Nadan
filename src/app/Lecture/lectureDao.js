@@ -15,9 +15,38 @@ async function selectLectureList (connection){
     return lectureListResult;
 }
 
+async function checkBigCategory(connection,bigCategoryName){
+    const checkQuery = `
+    select 
+        BIG_CATEGORY_NAME 
+    from LECTURE_TOP_CATEGORIES
+        where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRow] = await connection.query(checkQuery,bigCategoryName);
+    return resultRow;
+}
+
+async function selectTopLectureList(connection,bigCategoryName){
+    const topLectureListQuery = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(topLectureListQuery,bigCategoryName);
+    return resultRows;
+}
+
 async function selectLectureTag(connection){
     const lectureTagQuery = `
-    select  
+    select distinct
         LT.LECTURE_ID,MCT.CATEGORY_TAG_NAME 
     from LECTURES
     inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
@@ -41,6 +70,108 @@ async function selectLectureMiddle(connection){
     const [lectureMiddleResult] = await connection.query(lectureMiddleQuery);
 
     return lectureMiddleResult;
+}
+
+async function selectTopLectureMiddle(connection,topCategoryName) {
+
+    const lectureMiddleQuery = `
+    select distinct
+        LECTURE_ID,MIDDLE_CATEGORY_NAME 
+    from LECTURE_TAGS
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LECTURE_TAGS.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LECTURE_TAGS.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(lectureMiddleQuery,topCategoryName);
+    return resultRows;
+
+}
+
+async function selectTopLectureTag(connection,topCategoryName) {
+    const lectureTagQuery = `
+    select distinct 
+        LECTURE_ID, MCT.CATEGORY_TAG_NAME 
+    from LECTURE_TAGS
+    inner join MIDDLE_CATEGORY_TAGS MCT on LECTURE_TAGS.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LECTURE_TAGS.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LECTURE_TAGS.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(lectureTagQuery,topCategoryName);
+
+    return resultRows;
+}
+
+async function selectMiddleLectureList(connection,bigCategoryName,middleCategoryName) {
+    const topMiddleLectureQuery = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRows] = await connection.query(topMiddleLectureQuery,[bigCategoryName,middleCategoryName]);
+    return resultRows;
+}
+
+async function selectMiddleLecture(connection,bigCategoryName,middleCategoryName) {
+    const middleLectureQuery =`
+    select distinct 
+        LT.LECTURE_ID, LMC.MIDDLE_CATEGORY_NAME
+    from LECTURE_TAGS LT
+inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+INNER JOIN (SELECT LECTURE_ID, LECTURE_TAGS.MIDDLE_CATEGORY_ID
+            FROM LECTURE_TAGS
+                inner join LECTURE_MIDDLE_CATEGORIES L
+                    on LECTURE_TAGS.MIDDLE_CATEGORY_ID = L.MIDDLE_CATEGORY_ID
+            WHERE MIDDLE_CATEGORY_NAME = ? )AS SUB
+    ON SUB.LECTURE_ID = LT.LECTURE_ID
+where BIG_CATEGORY_NAME = ?;
+    `;
+    const [resultRows] = await connection.query(
+        middleLectureQuery,
+        [middleCategoryName,bigCategoryName]
+    );
+    return resultRows;
+}
+
+async function selectMiddleLectureTag(connection,bigCategoryName,middleCategoryName) {
+    const tagLectureQuery = `
+    select 
+        L.LECTURE_ID,CATEGORY_TAG_NAME 
+    from LECTURE_TAGS
+    inner join MIDDLE_CATEGORY_TAGS MCT on LECTURE_TAGS.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LECTURE_TAGS.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LECTURE_TAGS.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    inner join LECTURES L on LECTURE_TAGS.LECTURE_ID = L.LECTURE_ID
+        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRow] = await connection.query(tagLectureQuery,[bigCategoryName,middleCategoryName]);
+    return resultRow;
+}
+
+async function checkMiddleCategory(connection,bigCategoryName,middleCategoryName){
+    const checkQuery = `
+    select distinct 
+        MIDDLE_CATEGORY_NAME 
+    from LECTURE_MIDDLE_CATEGORIES
+    inner join LECTURE_TAGS LT on LECTURE_MIDDLE_CATEGORIES.MIDDLE_CATEGORY_ID = LT.MIDDLE_CATEGORY_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
+    `;
+
+    const [resultRow] = await connection.query(checkQuery,[bigCategoryName,middleCategoryName]);
+    return resultRow;
 }
 
 async function selectUserHaveLecture(connection, id, lectureId) {
@@ -442,9 +573,18 @@ module.exports = {
     selectLectureList,
     selectLectureTag,
     selectLectureMiddle,
-
     selectLectureSession,
     selectSessionClasses,
+
+    checkBigCategory,
+    selectTopLectureList,
+    selectTopLectureMiddle,
+    selectTopLectureTag,
+    selectMiddleLectureList,
+    selectMiddleLecture,
+    selectMiddleLectureTag,
+    checkMiddleCategory,
+
     selectLectureReviews,
     insertLectureReview,
     updateLectureReview,
@@ -460,4 +600,5 @@ module.exports = {
     selectReviewsCreatedSort,
     selectReviewsHighGPA,
     selectReviewsLowGPA
+
 };

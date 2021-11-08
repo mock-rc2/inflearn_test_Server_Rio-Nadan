@@ -12,11 +12,72 @@ const regexEmail = require("regex-email");
  * [GET] /inflearn/courses/lectures
  */
 exports.getAllLectureList = async function(req,res){
+    /**
+     * Query String: tagName
+     */
+    const tagName = req.query.skill;
+    console.log(tagName);
 
-    const lectureResult = await lectureProvider.getLectureList();
+    const lectureResult = await lectureProvider.getAllLectureList(tagName);
+
+    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
+
+}
+/**
+ * API No.
+ * API Name : TOP 카테고리 별 강의 조회 API
+ * [GET] /inflearn/courses/lectures/{bigCategoryName}
+ */
+exports.getBigLectureList = async function(req,res){
+    /**
+     * Path Variable(타겟이 있는경우): bigCategoryName
+     * Query String : tagName
+     */
+    const bigCategoryName = req.params.bigCategoryName;
+    const tagName = req.query.skill;
+
+    if(!bigCategoryName)
+        return res.redirect('/inflearn/courses/lectures');
+
+    const isExist = await lectureProvider.checkBigCategoryList(bigCategoryName);
+
+    if(isExist.length < 1)
+        return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
+
+
+    const lectureResult = await lectureProvider.getLectureList(bigCategoryName,tagName);
 
     return res.send(lectureResult);
+}
 
+/**
+ * API No.
+ * API Name : middle 카테고리 별 강의 조회 API
+ * [GET] /inflearn/courses/lectures/{bigCategoryName}/{middleCategoryName}
+ */
+exports.getMiddleLectureList = async function(req,res){
+    /**
+     * Path Variable(타겟이 있는경우): bigCategoryName,middleCategoryName
+     * Query String : tagName
+     */
+    const bigCategoryName = req.params.bigCategoryName;
+    const middleCategoryName = req.params.middleCategoryName;
+
+    const tagName = req.query.skill;
+
+    if(!bigCategoryName)
+        return res.redirect('/inflearn/courses/lectures');
+    else if(!middleCategoryName)
+        return res.redirect('/inflearn/courses/lectures/:bigCategoryName')
+
+    const isExist = await lectureProvider.checkMiddleCategoryList(bigCategoryName,middleCategoryName,tagName);
+
+    if(isExist.length < 1)
+        return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
+
+    const lectureResult = await lectureProvider.getMiddleLectureList(bigCategoryName,middleCategoryName);
+
+    return res.send(lectureResult);
 }
 
 exports.getUserLecture = async function(req, res) {
@@ -27,7 +88,11 @@ exports.getUserLecture = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
+
+        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
+
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -45,6 +110,7 @@ exports.getLectureHeaderItems = async function(req, res) {
     if(!lectureId)
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
+
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
     if(checkLectureRow.length < 1)
@@ -60,6 +126,7 @@ exports.getLectureIntroduction = async function(req, res) {
 
     if(!lectureId)
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
@@ -79,6 +146,7 @@ exports.getSessionClasses = async function(req, res) {
     if(!lectureId)
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
+
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
     if(checkLectureRow.length < 1)
@@ -91,6 +159,7 @@ exports.getSessionClasses = async function(req, res) {
 
 exports.getLectureReviews = async function(req, res) {
     const lectureId = req.params['lectureId'];
+
     const sortQuery = req.query.sort;
     let lectureReviews;
 
@@ -98,6 +167,7 @@ exports.getLectureReviews = async function(req, res) {
 
     if(!lectureId)
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
 
     if(checkLectureRow.length < 1)
         return res.send(errResponse(baseResponse.LECTURE_NOT_EXISTENCE));
@@ -181,6 +251,7 @@ exports.deleteLectureReview = async function(req, res) {
     if(!lectureId)
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
 
+
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
     const checkUserReviewRow = await lectureProvider.checkUserLectureReview(userId, reviewId);
@@ -194,6 +265,8 @@ exports.deleteLectureReview = async function(req, res) {
     const deleteReviewResult = await lectureService.deleteLectureReview(reviewId);
 
     return  res.send(deleteReviewResult);
+
+
 }
 
 exports.getLectureNotice = async function(req, res) {
@@ -290,4 +363,5 @@ exports.getLectureInfo = async function(req, res){
     const getLectureInfoResult = await lectureProvider.selectLectureInfo(lectureId);
     console.log('test', getLectureInfoResult);
     return res.send(response(baseResponse.SUCCESS("조회 성공 하였습니다."), getLectureInfoResult));
+
 }
