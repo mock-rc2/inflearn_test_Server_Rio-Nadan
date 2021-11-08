@@ -6,7 +6,6 @@ const {errResponse} = require("../../../config/response");
 const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
 const {query} = require("winston");
-const {checkLectureUser} = require("./lectureProvider");
 
 
 exports.getLectureList = async function() {
