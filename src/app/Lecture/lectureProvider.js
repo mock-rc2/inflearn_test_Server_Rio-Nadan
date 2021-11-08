@@ -194,6 +194,13 @@ exports.checkLectureUser = async function (userId, lectureId) {
     return selectLectureUser;
 }
 
+exports.selectLectureInfo = async function(lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectLectureInfo = await lectureDao.selectLectureInfo(connection, lectureId);
+    connection.release();
+
+    return selectLectureInfo[0];
+}
 exports.selectReviewCreatedSort = async function(lectureId){
     const connection = await pool.getConnection(async (conn) => conn);
     const selectReviewRows = await lectureDao.selectReviewsCreatedSort(connection, lectureId);
