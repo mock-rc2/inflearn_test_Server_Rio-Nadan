@@ -194,10 +194,26 @@ exports.checkLectureUser = async function (userId, lectureId) {
     return selectLectureUser;
 }
 
-exports.checkUserLectureNotice = async function (noticeId, userId){
+exports.selectReviewCreatedSort = async function(lectureId){
     const connection = await pool.getConnection(async (conn) => conn);
-    const selectUserLectureNotice = await lectureDao.selectLectureNoticeUser(connection, noticeId, userId);
+    const selectReviewRows = await lectureDao.selectReviewsCreatedSort(connection, lectureId);
     connection.release();
 
-    return selectUserLectureNotice;
+    return selectReviewRows;
+}
+
+exports.selectReviewHighGPA = async function(lectureId){
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectReviewRows = await lectureDao.selectReviewsHighGPA(connection, lectureId);
+    connection.release();
+
+    return selectReviewRows;
+}
+
+exports.selectReviewLowGPA = async function(lectureId){
+    const connection = await pool.getConnection(async (conn) => conn);
+    const selectReviewRows = await lectureDao.selectReviewsLowGPA(connection, lectureId);
+    connection.release();
+
+    return selectReviewRows;
 }
