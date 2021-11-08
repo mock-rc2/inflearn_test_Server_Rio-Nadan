@@ -25,4 +25,14 @@ module.exports = function(app){
 
     app.delete('/inflearn/lectures/:lectureId/reviews/:reviewId',jwtMiddleware, lectures.deleteLectureReview);
 
+    app.get('/inflearn/lectures/:lectureId/notice', lectures.getLectureNotice);
+
+    app.post('/inflearn/lectures/:lectureId/notice', jwtMiddleware, lectures.postLectureNotice);
+
+    app.put('/inflearn/lectures/:lectureId/notice/:noticeId', jwtMiddleware, lectures.putLectureNotice);
+
+    app.delete('/inflearn/lectures/:lectureId/notice/:noticeId', jwtMiddleware, lectures.deleteLectureNotice);
+
+    app.get('/inflearn/lectures/:lectureId/info', lectures.getLectureInfo);
 };
+

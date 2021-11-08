@@ -408,6 +408,158 @@ async function deleteUserReview(connection, reviewId){
     return deleteUserReviewResult;
 }
 
+async function selectLectureNotice(connection, lectureId) {
+    const selectLectureNoticeQuery = `
+        SELECT NOTICE_ID, NOTICE_TITLE, NOTICE_CONTENT, DATE_FORMAT(CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_NOTICE
+        WHERE LECTURE_ID = ?
+    `;
+
+    const [selectUserLectureRows] = await connection.query(
+        selectLectureNoticeQuery,
+        lectureId
+    );
+
+    return selectUserLectureRows;
+}
+
+async function insertLectureNotice(connection, lectureNoticeParams) {
+    const insertLectureNoticeQuery  = `
+        INSERT INTO LECTURE_NOTICE(LECTURE_ID, USER_ID, NOTICE_TITLE, NOTICE_CONTENT) VALUES (?, ?, ?, ?);
+    `;
+
+    const insertLectureRow = await connection.query(
+        insertLectureNoticeQuery,
+        lectureNoticeParams
+    )
+
+    return insertLectureRow;
+}
+
+async function selectLectureUser(connection, userId, lectureId){
+    const selectLectureUserQuery = `
+        SELECT USER_ID
+        FROM LECTURES
+        WHERE USER_ID = ? AND LECTURE_ID = ?
+    `;
+
+    const [selectLectureUserResult] = await connection.query(
+        selectLectureUserQuery,
+        [userId, lectureId]
+    );
+
+    return selectLectureUserResult;
+}
+
+async function updateLectureNotice(connection, lectureNoticeParams) {
+    const updateLectureQuery = `
+        UPDATE LECTURE_NOTICE
+        SET NOTICE_TITLE = ?, NOTICE_CONTENT = ?
+        WHERE NOTICE_ID = ?;
+    `;
+
+    const updateLectureResult = await connection.query(
+        updateLectureQuery,
+        lectureNoticeParams
+    )
+
+    return updateLectureResult;
+}
+
+async function deleteLectureNotice(connection, noticeId) {
+    const deleteNoticeQuery = `
+        DELETE FROM LECTURE_NOTICE WHERE NOTICE_ID = ?;
+    `;
+
+    const deleteNoticeResult = await connection.query(
+        deleteNoticeQuery,
+        noticeId
+    );
+
+    return deleteNoticeResult;
+}
+
+async function selectLectureInfo(connection, lectureId) {
+    const selectLectureInfoQuery = `
+    SELECT L.PRICE, U.NICK_NAME, CLASS_INFO.CNT AS CLASS_COUNT, CLASS_INFO.LECTURE_TIME AS TOTAL_TIME, L.LEARNING_LEVEL
+    FROM LECTURES AS L 
+    INNER JOIN USERS AS U
+        ON L.USER_ID = U.USER_ID
+    INNER JOIN (SELECT S.LECTURE_ID AS LECTURE_ID, COUNT(C.CLASS_ID) AS CNT, 
+            SEC_TO_TIME(SUM(TIME_TO_SEC(S.SESSION_TOTAL_TIME)))AS LECTURE_TIME
+                FROM LECTURE_SESSION AS S
+                    INNER JOIN LECTURE_CLASSES AS C
+                        ON S.SESSION_ID = C.SESSION_ID
+                GROUP BY S.LECTURE_ID) AS CLASS_INFO
+        ON L.LECTURE_ID = CLASS_INFO.LECTURE_ID
+    WHERE L.LECTURE_ID = ?;
+    `;
+
+    const [resultRow] = await connection.query(
+        selectLectureInfoQuery,
+        lectureId
+    );
+
+    return resultRow;
+}
+
+async function selectReviewsCreatedSort(connection, lectureId) {
+    const selectReviewsCreatedSortQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?
+        ORDER BY REVIEW.CREATED_AT ASC;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectReviewsCreatedSortQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function selectReviewsHighGPA(connection, lectureId) {
+    const selectReviewsHighGPAQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?
+        ORDER BY REVIEW.STAR_POINT DESC;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectReviewsHighGPAQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
+async function selectReviewsLowGPA(connection, lectureId) {
+    const selectReviewsLowGPAQuery = `
+        SELECT REVIEW.LECTURE_REVIEW_ID, USERS.NICK_NAME, REVIEW.STAR_POINT, REVIEW.REVIEW_COMMENT
+                , USERS.PROFILE_IMAGE_URL, DATE_FORMAT(REVIEW.CREATED_AT, '%Y-%m-%d') AS CREATED_DATE
+        FROM LECTURE_REVIEWS AS REVIEW 
+            INNER JOIN USERS 
+                ON REVIEW.USER_ID = USERS.USER_ID
+        WHERE REVIEW.LECTURE_ID = ?
+        ORDER BY REVIEW.STAR_POINT ASC;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectReviewsLowGPAQuery,
+        lectureId
+    );
+
+    return resultRows;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -437,6 +589,16 @@ module.exports = {
     insertLectureReview,
     updateLectureReview,
     selectUserLectureReview,
-    deleteUserReview
+    deleteUserReview,
+    selectLectureNotice,
+    insertLectureNotice,
+    selectLectureUser,
+    updateLectureNotice,
+    deleteLectureNotice,
+    selectLectureInfo,
+
+    selectReviewsCreatedSort,
+    selectReviewsHighGPA,
+    selectReviewsLowGPA
 
 };
