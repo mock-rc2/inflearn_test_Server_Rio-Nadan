@@ -1,3 +1,18 @@
+async function buildQuery(tags) {
+    let initial = 'WHERE TAG_NAME = ' + "'" + tags[0] + "'";
+    let string = [];
+
+
+    for(let i=1;i<tags.length;i++){
+        if(i !== tags.length){
+            string += (' OR' + ' TAG_NAME = ' + "'" + tags[i] + "'");
+            console.log(string);
+        }
+    }
+    let query = initial + string + ';';
+    return query;
+}
+
 
 async function selectLectureList (connection){
     const lectureListQuery = `
@@ -10,6 +25,27 @@ async function selectLectureList (connection){
     inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
     inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID;
     `;
+
+    const [lectureListResult] = await connection.query(lectureListQuery);
+    return lectureListResult;
+}
+
+async function filterLectureList (connection, params){
+    let lectureListQuery = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,STAR_POINT,
+        SALE_PERCENT,PRICE,U.NICK_NAME,LEARNING_LEVEL,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    inner join MIDDLE_CATEGORY_TAGS AS TAG ON LT.CATEGORY_TAG_ID = TAG.CATEGORY_TAG_ID
+    WHERE 
+    `;
+    let tagQuery = await appendTags(params);
+
+    lectureListQuery += tagQuery;
 
     const [lectureListResult] = await connection.query(lectureListQuery);
     return lectureListResult;
@@ -58,16 +94,17 @@ async function selectLectureTag(connection){
     return lectureTagResult;
 }
 
-async function selectLectureMiddle(connection){
+async function selectLectureMiddle(connection,lectureId){
     const lectureMiddleQuery = `
     select distinct 
-        LECTURE_ID,LMC.MIDDLE_CATEGORY_NAME 
+        LMC.MIDDLE_CATEGORY_NAME 
     from LECTURE_TAGS LT
     inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    where LECTURE_ID = ?
     order by LECTURE_ID asc;
     `;
 
-    const [lectureMiddleResult] = await connection.query(lectureMiddleQuery);
+    const [lectureMiddleResult] = await connection.query(lectureMiddleQuery,lectureId);
 
     return lectureMiddleResult;
 }
@@ -599,6 +636,7 @@ module.exports = {
 
     selectReviewsCreatedSort,
     selectReviewsHighGPA,
-    selectReviewsLowGPA
+    selectReviewsLowGPA,
+    buildQuery
 
 };

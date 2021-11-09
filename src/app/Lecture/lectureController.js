@@ -18,7 +18,7 @@ exports.getAllLectureList = async function(req,res){
     const tagName = req.query.skill;
     console.log(tagName);
 
-    const lectureResult = await lectureProvider.getAllLectureList(tagName);
+    const lectureResult = await lectureProvider.getFilterLectureList(tagName);
 
     return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
 
