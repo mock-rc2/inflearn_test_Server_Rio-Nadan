@@ -1,13 +1,12 @@
-module.exports = function(app){
-    const user = require('./userController');
-    const jwtMiddleware = require('../../../config/jwtMiddleware');
+const user = require('./userController');
+const jwtMiddleware = require('../../../config/jwtMiddleware');
 
+module.exports = function(app){
     // 테스트 API
     app.get('/inflearn/test', user.getTest)
 
     // 유저 로그인 API
     app.post('/inflearn/users/login', user.postLoginUsers);
-
 
     // 유저 회원가입 API
     app.post('/inflearn/users/signup',user.postUsers);
