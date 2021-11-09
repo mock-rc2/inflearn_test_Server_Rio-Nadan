@@ -21,7 +21,7 @@ module.exports = function(app){
     app.get('/inflearn/users/token/issuance', user.userTokenIssuance);
 
     // 소셜 로그인 API CORS 오류로 인한 보류
-    // app.get('/inflearn/users/oauth/login',user.oauthKakaoLogin);
+    app.get('/inflearn/oauth2/:cooperation', user.oauthLogin);
 
     // 강의 목록 API 브런치 따서 작업하면 됌
 

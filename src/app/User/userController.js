@@ -7,6 +7,7 @@ const requestHandler = require("../../../config/requestHandler")
 const regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
 const regexEmail = require("regex-email");
 const {emit} = require("nodemon");
+const qs = require('qs');
 
 /**
  * API No. 0
@@ -53,49 +54,67 @@ exports.postUsers = async function (req, res) {
 
     return res.send(signUpResponse);
 };
-// CORS 오류로 인한 보류
-/*exports.oauthKakaoLogin = async function (req,res) {
 
-    const accessToken = req.headers['access-token'];
+exports.oauthLogin = async function (req, res) {
+    try {
+        const cooperation = req.params.cooperation;
+        console.log(cooperation);
+        switch (cooperation) {
+            case 'kakao':
+                // 인증 코드
+                const code = req.query.code;
+                console.log("code:", code)
+                const requestBody = await userService.createKakaoBody(code);
 
-    const getOptions = {
-        header: {
-            'Content-Type': 'appication/x-www-form-urlencoded;charset=utf-8',
-            'Authorization': 'Bearer ' + accessToken
+                let option = {
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'},
+                    body: qs.stringify(requestBody)
+                };
+
+                const accessToken = await requestHandler.requestAccessToken(option);
+                console.log(accessToken);
+                const tokenObj = JSON.parse(accessToken)
+
+                const getOptions = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+                        'Authorization': 'Bearer '+ tokenObj.access_token
+                    }
+                };
+
+                const getRes = await requestHandler.requestUserEmail(getOptions);
+
+                let userRow = JSON.parse(getRes);
+
+                const email = userRow.kakao_account.email;
+
+                const name = userRow.kakao_account.name;
+
+                // 빈 값 체크
+                if (!email)
+                    return res.send(response(baseResponse.KAKAO_LOGIN_EMAIL_EMPTY));
+
+                // 형식 체크 (by 정규표현식)
+                if (!regexEmail.test(email))
+                    return res.send(response(baseResponse.SIGNIN_EMAIL_ERROR_TYPE));
+
+                const checkParam = await userProvider.emailCheck(email);
+
+                if(checkParam.length < 1) {
+                    const signUpResponse = await userService.oauthCreateUser(email, name);
+
+                    return res.send(signUpResponse);
+                }else {
+                    const signInResponse = await userService.oauthSignIn(email, null);
+                    return res.send(signInResponse);
+                }
+                break;
         }
-    };
-
-    const getRes = await requestHandler.requestUserEmail(getOptions);
-
-    console.log(getRes);
-    let userInfo = JSON.parse(getRes.body);
-
-    let email = userInfo.kakao_account.email;
-    let name = userInfo.kakao_account.name;
-
-    // 빈 값 체크
-    if (!email)
-        return res.send(response(baseResponse.SIGNUP_EMAIL_EMPTY));
-
-    // 길이 체크
-    if (email.length > 30)
-        return res.send(response(baseResponse.SIGNUP_EMAIL_LENGTH));
-
-    // 형식 체크 (by 정규표현식)
-    if (!regexEmail.test(email))
-        return res.send(response(baseResponse.SIGNUP_EMAIL_ERROR_TYPE));
-
-    const checkParam = await userProvider.emailCheck(email);
-
-    if (checkParam.length < 1) {
-        const signUpResponse = await userService.oauthCreateUser(email,name);
-
-        return res.send(signUpResponse);
-    }else{
-        const signInResponse = await userService.oauthSignIn(email);
-        return res.send(signInResponse);
+    }catch (err) {
+        console.error(err);
+        res.send(response(baseResponse.KAKAO_LOGIN_FAIL));
     }
-}*/
+}
 
 /**
  * API Name : 유저 로그인 API
