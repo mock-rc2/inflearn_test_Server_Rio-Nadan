@@ -42,6 +42,7 @@ module.exports = {
 
     LECTURE_ID_REVIEW_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
     USER_TOKEN_EMPTY:{"isSuccess": false, "code": 2027, "message": "토큰이 비어 있습니다."},
+    KAKAO_LOGIN_EMAIL_EMPTY:{"isSuccess": false, "code": 2028, "message": "카카오 이메일이 비어 있습니다."},
 
     // Nadan
     CATEGORY_NOT_EXIST : {"isSuccess": false, "code": 2031, "message": "존재하지 않는 카테고리입니다."},
@@ -79,6 +80,7 @@ module.exports = {
     INSERT_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3041, "message":"강의 공지 작성을 실패하였습니다."},
     UPDATE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 수정을 실패하였습니다."},
     DELETE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3043, "message":"강의 공지 삭제를 실패하였습니다."},
+    KAKAO_LOGIN_FAIL:{ "isSuccess": false, "code": 3044, "message":"카카오 로그인이 실패하였습니다."},
 
 
     //Connection, Transaction 등의 서버 오류
