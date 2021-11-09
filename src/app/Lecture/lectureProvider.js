@@ -7,240 +7,182 @@ const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
 const {query} = require("winston");
 
+exports.getFilterLectureList = async function(tagRow) {
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    if(tagRow){
+        let tags = tagRow.split(',');
+        let where = await lectureDao.buildQuery(tags);
 
 
-exports.getAllLectureList = async function(tagName) {
-
-    const connection = await pool.getConnection(async (conn) => conn);
-
-    const resultList = await lectureDao.selectLectureList(connection);
-    const tagResult = await lectureDao.selectLectureTag(connection);
-    const middleResult = await lectureDao.selectLectureMiddle(connection);
-
-    let map = new Map();
-
-    //console.log("쌩 map: " + map); // => 쌩 map: [object Map]
-    // [{id:1,name:스프링 강의},{id:2,name: 디자인 패턴 강의}]
-
-    // {id:1,name:스프링 강의} -> row, {id:2,name: 디자인 패턴 강의} -> row
-    await resultList.forEach(function (row) {
-        // row = {id:1,name:스프링 강의,MIDDLE_CATEGORY_NAME:[]}
-        row.MIDDLE_CATEGORY_NAME = []; //row에 MIDDLE_CATEGORY_NAME 배열 추가.
-        // row = {id:1,name:스프링 강의,MIDDLE_CATEGORY_NAME:[],TAG:[]}
-        row.TAG = []; //row에 TAG배열 추가.
-
-        //console.log("resultList_row:" + row.tag);// => resultList_row:undefined 아직 TAG row에는 아무것도 들어가지 않았음
-
-        //map(1) -> {id:1,name:스프링 강의,tag:[]}
-        //map(2) -> {id:2,name: 디자인 패턴 강의,tag:[]}
-        map.set(row.LECTURE_ID, row);
-
-        //console.log(row.LECTURE_ID); // => 1 2 4 5 6 7 8 lecture
-        // console.log(map.get(1)); // map 에 key값 = 1 인 정보 불러오기(forEach이므로 반복해서 가져옴)
-        // console.log(map.has(row.LECTURE_ID)); // true. 해당 map은 key로 row.LECTURE_ID를 씀
-        // console.log(map.size); // map의 사이즈 1~7까지 순차적으로 표현.(forEach로 반복하여 개수가 증가함)
-        // console.log(map.keys());
-        // console.log(row);
-
-    });
-
-    await middleResult.forEach(function (row) {
-        let lecture = map.get(row.LECTURE_ID);
-        // console.log(lecture);
-        lecture.MIDDLE_CATEGORY_NAME.push(row.MIDDLE_CATEGORY_NAME);
-        map.set(row.LECTURE_ID, lecture);
-    });
-
-    // console.log(map);
-    // [{id:1, name:backend}, {id:1, name:java}, {id:2 , name:java}]
-    await tagResult.forEach(function (row) {
-        //{id:1,name:스프링 강의,tag:[]}
-        let lecture = map.get(row.LECTURE_ID);
-        //{id:1,name:스프링 강의,tag:[{id:1, name:backend}]}
-        //{id:1,name:스프링 강의,tag:[{id:1, name:backend}, {id:1, name:java}]}
-        lecture.TAG.push(row.CATEGORY_TAG_NAME);
-        //map(1) ->{id:1,name:스프링 강의,tag:[{id:1, name:backend}]}
-        //map(1) ->{id:1,name:스프링 강의,tag:[{id:1, name:backend}, {id:1, name:java}]}
-        map.set(row.LECTURE_ID, lecture);
-        // console.log(lecture);
-
-    });
+        const lectureResultFilter = await lectureDao.filterLectureList(connection,where);
 
 
-    // console.log(resultRow);
-    if(tagName){
-        let tagSet;
-        let result = [];
-        console.log(resultRow); // Java ,Back-End
-        if(tagName){
-            tagSet = new Set(tagName.split(','));
+        for (const row of lectureResultFilter) {
+            row.MIDDLE_CATEGORY_NAME = [];
+            row.TAG = [];
+
+            const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+            await middleResult.forEach((m) => {
+                row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
+            });
+
+            const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+            await tagResult.forEach((t)=>{
+                row.TAG.push(t.CATEGORY_TAG_NAME);
+            })
         }
-        map.forEach((key, value) =>{
-        });
-        connection.release();
 
-        return result;
-    }else{
-        connection.release();
 
-        return resultRow;
+        connection.release;
+
+        return lectureResultFilter;
+
     }
 
+    const lectureResult = await lectureDao.selectLectureList(connection);
 
+    for (const row of lectureResult) {
+        row.MIDDLE_CATEGORY_NAME = [];
+        row.TAG = [];
+
+        const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+        await middleResult.forEach((m) => {
+            row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
+        });
+
+        const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+        await tagResult.forEach((t)=>{
+            row.TAG.push(t.CATEGORY_TAG_NAME);
+        })
+    }
+
+    connection.release();
+
+    return lectureResult;
 }
 
 exports.checkBigCategoryList = async function(bigCategoryName){
     const connection = await pool.getConnection(async (conn)=>conn);
     const checkResult = await lectureDao.checkBigCategory(connection,bigCategoryName);
-    console.log("checkResult:" + checkResult);
 
     connection.release();
 
     return checkResult;
 }
 
-exports.getLectureList = async function(bigCategoryName,tagName) {
+exports.getLectureList = async function(bigCategoryName,tagRow) {
 
-
-    //console.log(tagName);
     const connection = await pool.getConnection(async (conn) => conn);
-    const getResultList = await lectureDao.selectTopLectureList(connection, bigCategoryName);
-    const middleResult = await lectureDao.selectTopLectureMiddle(connection, bigCategoryName);
-    const tagResult = await lectureDao.selectTopLectureTag(connection, bigCategoryName);
 
-    let map = new Map();
+    if(tagRow){
+        let tags = tagRow.split(',');
+        let where = await lectureDao.buildQuery(tags);
 
-    await getResultList.forEach(function (row) {
+        const lectureResultFilter = await lectureDao.filterBigLectureList(connection,bigCategoryName,where);
+
+        for (const row of lectureResultFilter) {
+            row.MIDDLE_CATEGORY_NAME = [];
+            row.TAG = [];
+
+            const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+            await middleResult.forEach((m) => {
+                row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
+            });
+
+            const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+            await tagResult.forEach((t)=>{
+                row.TAG.push(t.CATEGORY_TAG_NAME);
+            })
+        }
+
+        connection.release;
+
+        return lectureResultFilter;
+
+    }
+
+    const lectureResult = await lectureDao.selectTopLectureList(connection,bigCategoryName);
+
+    for (const row of lectureResult) {
         row.MIDDLE_CATEGORY_NAME = [];
         row.TAG = [];
 
-        map.set(row.LECTURE_ID, row);
-        // console.log(map);
-        // console.log(map.size);
-    });
-
-    await middleResult.forEach(function (row) {
-        let lecture = map.get(row.LECTURE_ID);
-        //console.log(row)
-        lecture.MIDDLE_CATEGORY_NAME.push(row.MIDDLE_CATEGORY_NAME);
-        map.set(row.LECTURE_ID, lecture);
-    });
-
-    await tagResult.forEach(function (row) {
-        let lecture = map.get(row.LECTURE_ID);
-        lecture.TAG.push(row.CATEGORY_TAG_NAME);
-        map.set(row.LECTURE_ID, lecture);
-    });
-
-    let ref = Object.fromEntries(map);
-
-    let resultRow = Object.values(ref);
-    //console.log(resultRow);
-
-    if(tagName){
-        let tag;
-        //console.log(tagName); // Java ,Back-End
-        if(tagName){
-            tag = tagName.split(',');
-            //console.log(tag[0]); // Java
-        }
-
-        let reff = [];
-
-        reff = resultRow.filter(function (v) {
-            //console.log(v.TAG.includes(tag[0]))
-            for(let i = 0;i < tag.length;i++){
-                //console.log('1');
-                if(v.TAG.includes(tag[i])){
-                    return reff.push(v);
-                }
-            } // set 자료구조를 사용해서 filtering 해보자.
+        const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+        await middleResult.forEach((m) => {
+            row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
         });
 
-        //console.log(reff);
-
-        connection.release();
-
-        return response(baseResponse.SUCCESS("강의 목록 조회에 성공 했습니다"),reff);
-    }else{
-        connection.release();
-
-        return response(baseResponse.SUCCESS("강의 목록 조회에 성공 했습니다"),resultRow);
+        const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+        await tagResult.forEach((t)=>{
+            row.TAG.push(t.CATEGORY_TAG_NAME);
+        })
     }
+
+    connection.release();
+
+    return lectureResult;
+
 }
 
-exports.getMiddleLectureList = async function(bigCategoryName,middleCategoryName,tagName){
+exports.getMiddleLectureList = async function(bigCategoryName,middleCategoryName,tagRow){
 
     const connection = await pool.getConnection(async (conn)=>conn);
 
-    const getResultList = await lectureDao.selectMiddleLectureList(connection,bigCategoryName,middleCategoryName);
-    const middleResult = await lectureDao.selectMiddleLecture(connection,bigCategoryName,middleCategoryName);
-    const tagResult = await lectureDao.selectMiddleLectureTag(connection,bigCategoryName,middleCategoryName);
+    if(tagRow){
+        let tags = tagRow.split(',');
+        let where = await lectureDao.buildQuery(tags);
 
-    let map = new Map();
 
-    await getResultList.forEach(function (row) {
+        const lectureResultFilter = await lectureDao.filterMiddleLectureList(connection,bigCategoryName,middleCategoryName,where);
+
+
+        for (const row of lectureResultFilter) {
+            row.MIDDLE_CATEGORY_NAME = [];
+            row.TAG = [];
+            const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+            await middleResult.forEach((m) => {
+                row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
+            });
+
+            const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+            await tagResult.forEach((t)=>{
+                row.TAG.push(t.CATEGORY_TAG_NAME);
+            })
+        }
+
+        connection.release;
+
+        return lectureResultFilter;
+
+    }
+
+    const lectureResult = await lectureDao.selectMiddleLectureList(connection,bigCategoryName,middleCategoryName);
+
+    for (const row of lectureResult) {
         row.MIDDLE_CATEGORY_NAME = [];
         row.TAG = [];
 
-        map.set(row.LECTURE_ID, row);
-        // console.log(map);
-        // console.log(map.size);
-    });
 
-    await middleResult.forEach(function (row) {
-        let lecture = map.get(row.LECTURE_ID);
-        //console.log(row)
-        lecture.MIDDLE_CATEGORY_NAME.push(row.MIDDLE_CATEGORY_NAME);
-        map.set(row.LECTURE_ID, lecture);
-    });
-
-    await tagResult.forEach(function (row) {
-        let lecture = map.get(row.LECTURE_ID);
-        lecture.TAG.push(row.CATEGORY_TAG_NAME);
-        map.set(row.LECTURE_ID, lecture);
-    });
-    let ref = Object.fromEntries(map);
-
-    let resultRow = Object.values(ref);
-    //console.log(resultRow);
-
-    if(tagName){
-        let tag;
-        //console.log(tagName); // Java ,Back-End
-        if(tagName){
-            tag = tagName.split(',');
-            //console.log(tag[0]); // Java
-        }
-
-        let reff = [];
-
-        reff = resultRow.filter(function (v) {
-            //console.log(v.TAG.includes(tag[0]))
-            for(let i = 0;i < tag.length;i++){
-                //console.log('1');
-                if(v.TAG.includes(tag[i])){
-                    return reff.push(v);
-                }
-            } // set 자료구조를 사용해서 filtering 해보자.
+        const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+        await middleResult.forEach((m) => {
+            row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
         });
 
-        //console.log(reff);
-
-        connection.release();
-
-        return response(baseResponse.SUCCESS("강의 목록 조회에 성공 했습니다"),reff);
-    }else{
-        connection.release();
-
-        return response(baseResponse.SUCCESS("강의 목록 조회에 성공 했습니다"),resultRow);
+        const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+        await tagResult.forEach((t)=>{
+            row.TAG.push(t.CATEGORY_TAG_NAME);
+        })
     }
+
+    connection.release();
+
+    return lectureResult;
 }
 
 exports.checkMiddleCategoryList = async function(bigCategoryName,middleCategoryName){
     const connection = await pool.getConnection(async (conn) => conn);
     const checkResult = await lectureDao.checkMiddleCategory(connection,bigCategoryName,middleCategoryName);
-    console.log(checkResult);
     connection.release();
 
     return checkResult

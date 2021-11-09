@@ -16,9 +16,8 @@ exports.getAllLectureList = async function(req,res){
      * Query String: tagName
      */
     const tagName = req.query.skill;
-    console.log(tagName);
 
-    const lectureResult = await lectureProvider.getAllLectureList(tagName);
+    const lectureResult = await lectureProvider.getFilterLectureList(tagName);
 
     return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
 
@@ -47,7 +46,7 @@ exports.getBigLectureList = async function(req,res){
 
     const lectureResult = await lectureProvider.getLectureList(bigCategoryName,tagName);
 
-    return res.send(lectureResult);
+    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
 }
 
 /**
@@ -70,14 +69,14 @@ exports.getMiddleLectureList = async function(req,res){
     else if(!middleCategoryName)
         return res.redirect('/inflearn/courses/lectures/:bigCategoryName')
 
-    const isExist = await lectureProvider.checkMiddleCategoryList(bigCategoryName,middleCategoryName,tagName);
+    const isExist = await lectureProvider.checkMiddleCategoryList(bigCategoryName,middleCategoryName);
 
     if(isExist.length < 1)
         return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
 
-    const lectureResult = await lectureProvider.getMiddleLectureList(bigCategoryName,middleCategoryName);
+    const lectureResult = await lectureProvider.getMiddleLectureList(bigCategoryName,middleCategoryName,tagName);
 
-    return res.send(lectureResult);
+    return res.send(response(baseResponse.SUCCESS("강의 목록 조회에 성공하였습니다"),lectureResult));
 }
 
 exports.getUserLecture = async function(req, res) {

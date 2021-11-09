@@ -1,3 +1,17 @@
+async function buildQuery(tags) {
+    let initial = 'CATEGORY_TAG_NAME = ' + "'" + tags[0] + "'";
+    let string = [];
+
+
+    for(let i=1;i<tags.length;i++){
+        if(i !== tags.length){
+            string += (' OR' + ' CATEGORY_TAG_NAME = ' + "'" + tags[i] + "'");
+        }
+    }
+    let query = initial + string;
+    return query;
+}
+
 
 async function selectLectureList (connection){
     const lectureListQuery = `
@@ -14,6 +28,7 @@ async function selectLectureList (connection){
     const [lectureListResult] = await connection.query(lectureListQuery);
     return lectureListResult;
 }
+
 
 async function checkBigCategory(connection,bigCategoryName){
     const checkQuery = `
@@ -44,30 +59,72 @@ async function selectTopLectureList(connection,bigCategoryName){
     return resultRows;
 }
 
-async function selectLectureTag(connection){
+async function filterBigLectureList(connection,bigCategoryName,where){
+    let query =`
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    inner join MIDDLE_CATEGORY_TAGS AS TAG ON LT.CATEGORY_TAG_ID = TAG.CATEGORY_TAG_ID
+    where BIG_CATEGORY_NAME `;
+
+    let bigCategoryLectureQuery = query + ' = ' + "'" + bigCategoryName + "'" + ' AND (' + where + ' );';
+    const [resultRow] = await connection.query(bigCategoryLectureQuery);
+
+    return resultRow;
+}
+
+async function selectLectureTag(connection,lectureId){
     const lectureTagQuery = `
     select distinct
         LT.LECTURE_ID,MCT.CATEGORY_TAG_NAME 
     from LECTURES
     inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
-    inner join MIDDLE_CATEGORY_TAGS MCT on LT.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID;
+    inner join MIDDLE_CATEGORY_TAGS MCT on LT.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
+    where LT.LECTURE_ID = ?;
     `;
 
-    const [lectureTagResult] = await connection.query(lectureTagQuery);
+    const [lectureTagResult] = await connection.query(lectureTagQuery,lectureId);
 
     return lectureTagResult;
 }
 
-async function selectLectureMiddle(connection){
+async function filterLectureList(connection,where) {
+    let query = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,STAR_POINT,
+        SALE_PERCENT,PRICE,U.NICK_NAME,LEARNING_LEVEL,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+    inner join MIDDLE_CATEGORY_TAGS AS TAG ON LT.CATEGORY_TAG_ID = TAG.CATEGORY_TAG_ID
+    where `;
+    let lectureListQuery = query + where + ';';
+
+
+    const [resultRow] = await connection.query(lectureListQuery);
+
+    return resultRow;
+}
+
+
+async function selectLectureMiddle(connection,lectureId){
     const lectureMiddleQuery = `
     select distinct 
-        LECTURE_ID,LMC.MIDDLE_CATEGORY_NAME 
+        LMC.MIDDLE_CATEGORY_NAME 
     from LECTURE_TAGS LT
     inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    where LECTURE_ID = ?
     order by LECTURE_ID asc;
     `;
 
-    const [lectureMiddleResult] = await connection.query(lectureMiddleQuery);
+    const [lectureMiddleResult] = await connection.query(lectureMiddleQuery,lectureId);
 
     return lectureMiddleResult;
 }
@@ -105,7 +162,7 @@ async function selectTopLectureTag(connection,topCategoryName) {
 }
 
 async function selectMiddleLectureList(connection,bigCategoryName,middleCategoryName) {
-    const topMiddleLectureQuery = `
+    let topMiddleLectureQuery = `
     select distinct 
         LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
         STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
@@ -114,11 +171,34 @@ async function selectMiddleLectureList(connection,bigCategoryName,middleCategory
     inner join USERS U on LECTURES.USER_ID = U.USER_ID
     inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
     inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join MIDDLE_CATEGORY_TAGS MCT on LT.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
     inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
-        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ?;
+        where BIG_CATEGORY_NAME = ? AND MIDDLE_CATEGORY_NAME = ? ;
     `;
 
     const [resultRows] = await connection.query(topMiddleLectureQuery,[bigCategoryName,middleCategoryName]);
+    return resultRows;
+}
+
+async function filterMiddleLectureList(connection,bigCategoryName,middleCategoryName,where) {
+     let query = `
+    select distinct 
+        LT.LECTURE_ID,LECTURE_NAME,TITLE_IMAGE,INTRO_BODY,
+        STAR_POINT,SALE_PERCENT,PRICE,U.NICK_NAME,LECTURE_NAME,
+        LTC.BIG_CATEGORY_NAME 
+    from LECTURES
+    inner join USERS U on LECTURES.USER_ID = U.USER_ID
+    inner join LECTURE_TAGS LT on LECTURES.LECTURE_ID = LT.LECTURE_ID
+    inner join LECTURE_MIDDLE_CATEGORIES LMC on LT.MIDDLE_CATEGORY_ID = LMC.MIDDLE_CATEGORY_ID
+    inner join MIDDLE_CATEGORY_TAGS MCT on LT.CATEGORY_TAG_ID = MCT.CATEGORY_TAG_ID
+    inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
+        where `;
+
+    const topMiddleLectureQuery = query + 'BIG_CATEGORY_NAME = '+ "'" + bigCategoryName + "'" +
+        ' AND ' + 'MIDDLE_CATEGORY_NAME = ' + "'" + middleCategoryName + "'" +
+        ' AND (' + where + ' );';
+
+    const [resultRows] = await connection.query(topMiddleLectureQuery);
     return resultRows;
 }
 
@@ -599,6 +679,11 @@ module.exports = {
 
     selectReviewsCreatedSort,
     selectReviewsHighGPA,
-    selectReviewsLowGPA
+    selectReviewsLowGPA,
+    buildQuery,
+    filterLectureList,
+    filterBigLectureList,
+    filterMiddleLectureList
+
 
 };
