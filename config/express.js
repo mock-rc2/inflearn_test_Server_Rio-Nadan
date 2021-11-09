@@ -28,6 +28,8 @@ module.exports = function () {
 
     require('../src/app/Lecture/lectureRoute')(app);
 
+    require('../src/app/Community/communityRoute')(app);
+
     require('../src/indexRoute')(app);
 
     return app;
