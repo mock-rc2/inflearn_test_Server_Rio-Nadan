@@ -28,6 +28,9 @@ module.exports = function () {
 
     require('../src/app/Lecture/lectureRoute')(app);
 
+
+    require('../src/app/Video/videoRoute')(app);
+
     require('../src/indexRoute')(app);
 
     return app;

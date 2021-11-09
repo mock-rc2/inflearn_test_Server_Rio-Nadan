@@ -47,6 +47,7 @@ module.exports = {
 
     LECTURE_ID_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
     LECTURE_NOTICE_TITLE_EMPTY:{"isSuccess": false, "code": 2028, "message": "공지 제목이 비어있습니다."},
+    CLASS_VIDEO_EMPTY:{"isSuccess": false, "code": 2029, "message": "class 비디오가 비어있습니다."},
 
     // Nadan
     CATEGORY_NOT_EXIST : {"isSuccess": false, "code": 2031, "message": "존재하지 않는 카테고리입니다."},
@@ -81,7 +82,8 @@ module.exports = {
     UPDATE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 수정을 실패하였습니다."},
     DELETE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3043, "message":"강의 공지 삭제를 실패하였습니다."},
     KAKAO_LOGIN_FAIL:{ "isSuccess": false, "code": 3044, "message":"카카오 로그인이 실패하였습니다."},
-
+    INSERT_WATCHED_VIDEO_TIME_FAIL:{ "isSuccess": false, "code": 3045, "message":"비디오 저장에 실패 했습니다."},
+    UPDATE_WATCHED_VIDEO_TIME_FAIL:{ "isSuccess": false, "code": 3045, "message":"비디오 저장에 실패 했습니다."},
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
