@@ -1,7 +1,7 @@
-module.exports = function(app){
-    const user = require('./userController');
-    const jwtMiddleware = require('../../../config/jwtMiddleware');
+const user = require('./userController');
+const jwtMiddleware = require('../../../config/jwtMiddleware');
 
+module.exports = function(app){
     // 테스트 API
     app.get('/inflearn/test', user.getTest)
 

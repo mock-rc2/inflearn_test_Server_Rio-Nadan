@@ -87,11 +87,7 @@ exports.getUserLecture = async function(req, res) {
     const lectureId = req.params['lectureId'];
 
     if(!lectureId)
-
-        return res.send(errResponse(baseResponse.LECTURE_ID_REVIEW_EMPTY));
-
         return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
-
 
     const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
