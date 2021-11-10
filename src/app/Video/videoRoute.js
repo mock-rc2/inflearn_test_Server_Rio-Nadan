@@ -4,5 +4,7 @@ const jwtMiddleware = require('../../../config/jwtMiddleware');
 module.exports = function(app){
     app.get('/inflearn/lectures/:lectureId/classes/:classId/watch', jwtMiddleware, video.getWatchedVideo);
 
-    app.put('/inflearn/lectures/:lectureId/classes/:classId/watch', jwtMiddleware, video.putWatchedVideo)
+    app.patch('/inflearn/lectures/:lectureId/classes/:classId/watch', jwtMiddleware, video.patchWatchedVideo);
+
+    app.get('/inflearn/lectures/:lectureId/classes/list', jwtMiddleware, video.getWatchedVideoList)
 }

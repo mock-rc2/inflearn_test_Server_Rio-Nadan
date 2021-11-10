@@ -5,6 +5,9 @@ const {pool} = require("../../../config/database");
 const videoDao = require('./videoDao');
 const {logger} = require("../../../config/winston");
 const {exceptions} = require("winston");
+const lectureProvider = require('../Lecture/lectureProvider');
+const videoProvider = require('./videoProvider');
+
 
 exports.insertWatchedVideo = async function(userId, lectureId, classId) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -43,5 +46,20 @@ exports.updateWatchedVideo = async function(historyId, watchedTime) {
         return errResponse(baseResponse.SERVER_ERROR);
     }finally {
         connection.release();
+    }
+}
+
+exports.selectUserLectureList = async function(userId, lectureId) {
+    try{
+        const sessionRows = await lectureProvider.selectLectureSessions(lectureId);
+
+        for(let i = 0; i<sessionRows.length; i++) {
+            sessionRows[i].CLASS = await videoProvider.selectUserLectureHistory(userId, sessionRows[i].SESSION_ID);
+        }
+
+        return response(baseResponse.SUCCESS("강의 시청 목록 조회에 성공하였습니다."), sessionRows);
+    }catch (err){
+        logger.error(`App - select user watched video Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
     }
 }

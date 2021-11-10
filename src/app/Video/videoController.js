@@ -31,7 +31,7 @@ exports.getWatchedVideo = async function (req, res) {
     }
 }
 
-exports.putWatchedVideo = async function (req, res){
+exports.patchWatchedVideo = async function (req, res){
     const token = req.verifiedToken;
     const userId = token.userId;
     const lectureId = req.params['lectureId'];
@@ -57,4 +57,21 @@ exports.putWatchedVideo = async function (req, res){
     const updateVideoResult = await videoService.updateWatchedVideo(watchedVideoRow[0].HISTORY_ID, watchTime);
 
     return res.send(updateVideoResult);
+}
+
+exports.getWatchedVideoList = async function (req, res){
+    const token = req.verifiedToken;
+    const userId = token.userId;
+    const lectureId = req.params['lectureId'];
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
+    const userLectureRow = await lectureProvider.checkUserLecture(userId, lectureId);
+
+    if(userLectureRow.length<1)
+        return res.send(errResponse(baseResponse.CHECK_USER_LECTURES_FAIL));
+
+    const selectVideoListResult = await videoService.selectUserLectureList(userId, lectureId);
+
+    return res.send(selectVideoListResult);
 }
