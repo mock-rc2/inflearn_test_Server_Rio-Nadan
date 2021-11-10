@@ -20,7 +20,7 @@ exports.insertQuestionBoard = async function(params){
     try{
         await connection.beginTransaction();
 
-        const insertQuestionResult = await communityDao.insertQuestion(connection,params)
+        const insertQuestionResult = await communityDao.insertQuestion(connection,params);
 
         if(insertQuestionResult.affectedRows === 0) {
             await connection.rollback();

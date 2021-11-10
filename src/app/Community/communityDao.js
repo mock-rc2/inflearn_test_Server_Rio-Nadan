@@ -20,11 +20,19 @@ left join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
 }
 
 async function insertQuestion(connection,params){
-    const insertQuestionQuery = `
-    insert into 
-        BOARDS(USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
-    values (?,?,?,?,?);
-    `;
+    let insertQuestionQuery;
+    if(params.length < 6) {
+        insertQuestionQuery = `
+            insert into BOARDS(USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
+            values (?,?,?,?,?);
+        `;
+    }else{
+        insertQuestionQuery = `
+            insert into BOARDS(CLASS_ID,USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
+            values (?,?,?,?,?,?);
+        `;
+    }
+
 
     const result = await connection.query(insertQuestionQuery,params);
     return result;
@@ -49,11 +57,12 @@ async function checkQuestionBoardIsMine(connection,boardId,userId){
 }
 
 async function updateQuestionBoard(connection,params) {
+
     const updateQuestionQuery = `
     update BOARDS set 
         BOARD_TITLE = ? ,BOARD_CONTENT = ? 
     where BOARD_ID = ? 
-        AND BOARD_TYPE = 0 
+        AND BOARD_TYPE = ? 
         AND STATUS = 'active';
     `;
 
@@ -82,6 +91,29 @@ async function deleteQuestionBoard(connection,boardId) {
     return result
 }
 
+async function selectClassBoard(connection, params) {
+    const selectClassBoardQuery = `
+        SELECT B.BOARD_ID, B.BOARD_TITLE, B.BOARD_CONTENT, U.NICK_NAME, IFNULL(COMMENTS.COMMENT_CNT, 0)
+        FROM BOARDS AS B
+            INNER JOIN LECTURE_CLASSES AS C
+                ON B.CLASS_ID = C.CLASS_ID
+            INNER JOIN USERS AS U
+                ON B.USER_ID = U.USER_ID
+            LEFT OUTER JOIN(SELECT BOARD_ID, COUNT(ANSWER_ID) AS COMMENT_CNT
+                            FROM ANSWERS
+                            GROUP BY BOARD_ID) AS COMMENTS
+                ON COMMENTS.BOARD_ID = B.BOARD_ID
+        WHERE B.BOARD_TYPE = ? AND B.CLASS_ID = ?;
+    `;
+
+    const [result] = await connection.query(
+        selectClassBoardQuery,
+        params
+    );
+
+    return result
+}
+
 module.exports = {
     selectQuestionList,
     insertQuestion,
@@ -89,5 +121,6 @@ module.exports = {
     checkQuestionBoardIsMine,
     updateQuestionBoard,
     checkBoardType,
-    deleteQuestionBoard
+    deleteQuestionBoard,
+    selectClassBoard
 }

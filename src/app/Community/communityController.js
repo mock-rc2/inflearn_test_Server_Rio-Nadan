@@ -7,6 +7,7 @@ const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 const requestHandler = require("../../../config/requestHandler")
 const regexEmail = require("regex-email");
+const typeSet = new Set([0,1,2])
 
 exports.getBoardsRedirect = async function(req,res){
 
@@ -43,22 +44,37 @@ exports.postQuestion = async function(req,res){
     const type = req.body.type;
     const title = req.body.title;
     const content = req.body.content;
+    const classId = req.body.classId;
 
     let typeDescription;
+
     if(!title || !content)
         return res.send(errResponse(baseResponse.COMMUNITY_BLANK_EXIST));
 
-    if(type === 0){
-        typeDescription = '질문/답변';
-    }else if(type === 1){
-        typeDescription = '자유주제';
-    }else if(type === 2){
-        typeDescription = '스터디 모집'
-    }else{
-        return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+    switch (type){
+        case 0:
+            typeDescription = '질문/답변';
+            break;
+        case 1:
+            typeDescription = '자유주제';
+            break;
+        case 2:
+            typeDescription = '스터디 모집';
+            break;
+        default:
+            return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+            break;
     }
 
-    const postQuestionParams = [userId,title,content,type,typeDescription];
+    let postQuestionParams;
+
+    if(!classId) {
+        postQuestionParams = [userId,title,content,type,typeDescription];
+    }
+    else {
+        postQuestionParams = [classId,userId,title,content,type,typeDescription];
+    }
+
 
     const postQuestionBoard = await communityService.insertQuestionBoard(postQuestionParams);
 
@@ -113,4 +129,19 @@ exports.deleteQuestion = async function(req,res){
 
     return res.send(deleteQuestionBoard)
 
+}
+
+exports.getClassBoard = async function(req, res){
+    const type = Number.parseInt(req.query.type);
+    const classId = req.params.classId;
+
+    if(!classId)
+        return res.send(errResponse(baseResponse.CLASS_ID_EMPTY));
+
+    if(!typeSet.has(type))
+        return res.send(errResponse(baseResponse.TYPE_ID_WRONG));
+
+    const getClassResult = await communityProvider.getClassBoard(type, classId);
+
+    return res.send(response(baseResponse.SUCCESS("클래스 게시판 조회 성공"), getClassResult))
 }

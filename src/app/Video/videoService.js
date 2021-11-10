@@ -68,7 +68,6 @@ exports.updateWatchedVideoCompleteInfo = async function(historyId) {
     const connection = await pool.getConnection(async (conn) => conn);
     try{
         const completeCheck = await videoDao.updateClassLearningInfo(connection, historyId);
-
         if(completeCheck.affectedRows == 0)
             return response(errResponse(baseResponse.USER_UPDATE_CLASS_COMPLETE_FAIL));
 

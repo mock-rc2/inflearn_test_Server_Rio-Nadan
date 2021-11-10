@@ -6,7 +6,7 @@ module.exports = function(app){
 
     app.patch('/inflearn/lectures/:lectureId/classes/:classId/watch', jwtMiddleware, video.patchWatchedVideo);
 
-    app.get('/inflearn/lectures/:lectureId/classes/list', jwtMiddleware, video.getWatchedVideoList);
+    app.get('/inflearn/lectures/:lectureId/classes/watch/list', jwtMiddleware, video.getWatchedVideoList);
 
     app.patch('/inflearn/lectures/:lectureId/classes/:classId/complete', jwtMiddleware, video.patchWatchedComplete);
 }
