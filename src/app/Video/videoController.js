@@ -75,3 +75,30 @@ exports.getWatchedVideoList = async function (req, res){
 
     return res.send(selectVideoListResult);
 }
+
+exports.patchWatchedComplete = async function (req, res) {
+    const token = req.verifiedToken;
+    const userId = token.userId;
+    const lectureId = req.params['lectureId'];
+    const classId = req.params['classId'];
+
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
+    if(!classId)
+        return res.send(errResponse(baseResponse.CLASS_VIDEO_EMPTY));
+
+    const userLectureRow = await lectureProvider.checkUserLecture(userId, lectureId);
+
+    if(userLectureRow.length<1)
+        return res.send(errResponse(baseResponse.CHECK_USER_LECTURES_FAIL));
+
+    const watchedVideoRow = await videoProvider.selectWatchedVideo(userId, classId);
+
+    if(watchedVideoRow.length < 1)
+        return res.send(errResponse(baseResponse.USER_WATCHED_HISTORY_NOT_EXIST));
+
+    const watchingComplete = await videoService.updateWatchedVideoCompleteInfo(watchedVideoRow[0].HISTORY_ID);
+
+    return res.send(watchingComplete);
+}

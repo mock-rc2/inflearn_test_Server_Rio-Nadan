@@ -63,3 +63,21 @@ exports.selectUserLectureList = async function(userId, lectureId) {
         return errResponse(baseResponse.SERVER_ERROR);
     }
 }
+
+exports.updateWatchedVideoCompleteInfo = async function(historyId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try{
+        const completeCheck = await videoDao.updateClassLearningInfo(connection, historyId);
+
+        if(completeCheck.affectedRows == 0)
+            return response(errResponse(baseResponse.USER_UPDATE_CLASS_COMPLETE_FAIL));
+
+        return response(baseResponse.SUCCESS("강의 완료가 성공하였습니다."));
+    }catch (err){
+        await connection.rollback();
+        logger.error(`App - update user class complete Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    }finally {
+        connection.release();
+    }
+}
