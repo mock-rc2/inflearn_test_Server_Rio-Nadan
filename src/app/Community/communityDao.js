@@ -20,11 +20,19 @@ left join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
 }
 
 async function insertQuestion(connection,params){
-    const insertQuestionQuery = `
-    insert into 
-        BOARDS(USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
-    values (?,?,?,?,?);
-    `;
+    let insertQuestionQuery;
+    if(params.length < 6) {
+        insertQuestionQuery = `
+            insert into BOARDS(USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
+            values (?,?,?,?,?);
+        `;
+    }else{
+        insertQuestionQuery = `
+            insert into BOARDS(CLASS_ID,USER_ID,BOARD_TITLE,BOARD_CONTENT,BOARD_TYPE,BOARD_TYPE_DESCRIPTION) 
+            values (?,?,?,?,?,?);
+        `;
+    }
+
 
     const result = await connection.query(insertQuestionQuery,params);
     return result;
@@ -49,11 +57,12 @@ async function checkQuestionBoardIsMine(connection,boardId,userId){
 }
 
 async function updateQuestionBoard(connection,params) {
+
     const updateQuestionQuery = `
     update BOARDS set 
         BOARD_TITLE = ? ,BOARD_CONTENT = ? 
     where BOARD_ID = ? 
-        AND BOARD_TYPE = 0 
+        AND BOARD_TYPE = ? 
         AND STATUS = 'active';
     `;
 

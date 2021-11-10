@@ -44,7 +44,7 @@ async function updateWatchedVideo(connection, updateHistoryParams) {
 
 async function selectUserLectureList(connection, userParams) {
     const selectUserLectureListQuery = `
-        SELECT DISTINCT CLASS.CLASS_NAME, CLASS.CLASS_TIME, IFNULL(CLASS_HIST.IS_COMPLETED, 0) AS IS_COMPLETED
+        SELECT DISTINCT CLASS.CLASS_ID, CLASS.CLASS_NAME, CLASS.CLASS_TIME, IFNULL(CLASS_HIST.IS_COMPLETED, 0) AS IS_COMPLETED
         FROM LECTURE_CLASSES AS CLASS
             LEFT OUTER JOIN (SELECT CLASS_ID, IS_COMPLETED
                              FROM USER_CLASS_HISTORIES 

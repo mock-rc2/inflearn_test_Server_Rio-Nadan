@@ -27,7 +27,7 @@ exports.getWatchedVideo = async function (req, res) {
         const firstWatchedResult = await videoService.insertWatchedVideo(userId, lectureId, classId);
         return res.send(firstWatchedResult);
     }else{
-        return res.send(response(baseResponse.SUCCESS("강의 조회 성공") ,watchedVideo));
+        return res.send(response(baseResponse.SUCCESS("강의 조회 성공") ,watchedVideo[0]));
     }
 }
 

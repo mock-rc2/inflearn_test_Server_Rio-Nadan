@@ -43,22 +43,37 @@ exports.postQuestion = async function(req,res){
     const type = req.body.type;
     const title = req.body.title;
     const content = req.body.content;
+    const classId = req.body.classId;
 
     let typeDescription;
+
     if(!title || !content)
         return res.send(errResponse(baseResponse.COMMUNITY_BLANK_EXIST));
 
-    if(type === 0){
-        typeDescription = '질문/답변';
-    }else if(type === 1){
-        typeDescription = '자유주제';
-    }else if(type === 2){
-        typeDescription = '스터디 모집'
-    }else{
-        return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+    switch (type){
+        case 0:
+            typeDescription = '질문/답변';
+            break;
+        case 1:
+            typeDescription = '자유주제';
+            break;
+        case 2:
+            typeDescription = '스터디 모집';
+            break;
+        default:
+            return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+            break;
     }
 
-    const postQuestionParams = [userId,title,content,type,typeDescription];
+    let postQuestionParams;
+
+    if(!classId) {
+        postQuestionParams = [userId,title,content,type,typeDescription];
+    }
+    else {
+        postQuestionParams = [classId,userId,title,content,type,typeDescription];
+    }
+
 
     const postQuestionBoard = await communityService.insertQuestionBoard(postQuestionParams);
 
