@@ -28,12 +28,9 @@ module.exports = function () {
 
     require('../src/app/Lecture/lectureRoute')(app);
 
-<<<<<<< HEAD
     require('../src/app/Community/communityRoute')(app);
-=======
 
     require('../src/app/Video/videoRoute')(app);
->>>>>>> 3ab0ecb747c28f410cb17052b94b0e2d821a731f
 
     require('../src/indexRoute')(app);
 

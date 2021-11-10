@@ -5,6 +5,7 @@ const {response} = require("../../../config/response");
 const {errResponse} = require("../../../config/response");
 const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
+const lectureProvider = require("./lectureProvider");
 const {query} = require("winston");
 
 exports.getFilterLectureList = async function(tagRow) {
@@ -342,4 +343,90 @@ exports.selectReviewLowGPA = async function(lectureId){
 
     return selectReviewRows;
 
+}
+
+exports.getDashboardHeader = async function(lectureId,userId){
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
+
+    const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+
+    if(checkUserLecture.length < 1)
+        return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
+
+    let lectureHeaderRows = await lectureProvider.selectLectureHeader(lectureId);
+
+    lectureHeaderRows.studentCount = await lectureProvider.selectLectureStudentCount(lectureId);
+
+    lectureHeaderRows.previewCount = await lectureProvider.selectLecturePreviewCount(lectureId);
+
+    lectureHeaderRows.category = await lectureProvider.selectLectureCategory(lectureId);
+
+    lectureHeaderRows.tags = await lectureProvider.selectLectureTags(lectureId);
+
+    lectureHeaderRows.lectureProgress = await lectureDao.selectProgress(connection,lectureId,userId);
+
+    let allClassCnt = lectureHeaderRows.lectureProgress[0].allCnt;
+    let completeClassCnt = lectureHeaderRows.lectureProgress[0].completeCnt;
+    let progressRate = ((completeClassCnt/allClassCnt)*100).toFixed(2);
+
+    lectureHeaderRows.lectureProgress = [{'allClassCnt' :allClassCnt,'completeClassCnt' :completeClassCnt,'progressRate' :progressRate + '%'}];
+
+    connection.release();
+
+    return response(baseResponse.SUCCESS("헤더 정보를 가져왔습니다"),lectureHeaderRows);
+
+}
+
+exports.getDashboardQuestionCnt = async function(lectureId,userId){
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
+
+    const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+
+    if(checkUserLecture.length < 1)
+        return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
+
+    const getQuestionCnt = await lectureDao.selectQuestionList(connection,lectureId);
+
+    connection.release();
+
+    return response(baseResponse.SUCCESS("질문 목록 조회에 성공하였습니다"),getQuestionCnt)
+
+}
+
+exports.getDashboardCurriculum = async function(lectureId,userId){
+
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+
+    if(checkLectureRow.length < 1)
+        return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
+
+    const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+
+    if(checkUserLecture.length < 1)
+        return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
+
+    let sessionRows = await lectureProvider.selectLectureSessions(lectureId);
+
+    if(!sessionRows)
+        return errResponse(baseResponse.GET_LECTURE_SESSION_FAIL);
+
+    for(let i = 0; i<sessionRows.length; i++) {
+        sessionRows[i].CLASS = await lectureDao.selectLectureCurriculum(connection,sessionRows[i].SESSION_ID);
+    }
+
+    connection.release();
+
+    return response(baseResponse.SUCCESS("강의 세션 목록 조회에 성공하였습니다"),sessionRows)
 }

@@ -13,23 +13,23 @@ const crypto = require("crypto");
 const {connect} = require("http2");
 const communityProvider = require("../Community/communityProvider");
 
-exports.insertQuestionBoard = async function(params){
+exports.insertBoard = async function(params){
 
     const connection = await pool.getConnection(async (conn) => conn);
 
     try{
         await connection.beginTransaction();
 
-        const insertQuestionResult = await communityDao.insertQuestion(connection,params)
+        const insertQuestionResult = await communityDao.insertBoard(connection,params)
 
-        if(insertQuestionResult.affectedRows === 0) {
+        if(insertQuestionResult[0].affectedRows === 0) {
             await connection.rollback();
-            return errResponse(baseResponse.INSERT_QUESTION_FAIL);
+            return errResponse(baseResponse.INSERT_BOARD_FAIL);
         }
 
         await connection.commit();
 
-        return response(baseResponse.SUCCESS("질문 게시 성공"));
+        return response(baseResponse.SUCCESS("포스팅 성공"));
 
     }catch (err) {
         await connection.rollback();
@@ -41,9 +41,9 @@ exports.insertQuestionBoard = async function(params){
 
 }
 
-exports.updateQuestionBoard = async function(title,content,boardId,userId){
+exports.updateQuestionBoard = async function(title,content,boardId,userId,type){
     const connection = await pool.getConnection(async (conn)=>conn);
-    const params = [title,content,boardId];
+    const params = [title,content,boardId,type];
 
     try{
         await connection.beginTransaction();
@@ -51,23 +51,24 @@ exports.updateQuestionBoard = async function(title,content,boardId,userId){
         const isExist = await communityProvider.checkBoardExist(boardId);
 
         if(isExist.length < 1)
-            return errResponse(baseResponse.CHECK_QUESTION_FAIL)
+            return errResponse(baseResponse.CHECK_BOARD_FAIL)
 
         const myBoard = await communityProvider.checkBoardIsMine(boardId,userId);
 
         if(myBoard.length < 1)
-            return errResponse(baseResponse.UPDATE_QUESTION_DENIED);
+            return errResponse(baseResponse.UPDATE_BOARD_DENIED);
 
 
-        const isQuestion = await communityProvider.getBoardType(boardId);
+        const isBoardType = await communityProvider.getBoardType(boardId);
 
-        if(isQuestion[0].BOARD_TYPE !== 0)
-            return errResponse(baseResponse.WRONG_QUESTION_PATH);
+        if(isBoardType[0].BOARD_TYPE !== type)
+            return errResponse(baseResponse.WRONG_BOARD_PATH);
 
         const updateQuestionResult = await communityDao.updateQuestionBoard(connection,params);
-        if(updateQuestionResult.affectedRows === 0) {
+
+        if(updateQuestionResult[0].affectedRows === 0) {
             await connection.rollback();
-            return errResponse(baseResponse.UPDATE_QUESTION_FAIL);
+            return errResponse(baseResponse.UPDATE_BOARD_FAIL);
         }
         await connection.commit();
 
@@ -83,7 +84,7 @@ exports.updateQuestionBoard = async function(title,content,boardId,userId){
 
 }
 
-exports.deleteQuestionBoard = async function(boardId,userId){
+exports.deleteBoard = async function(boardId,userId,type){
     const connection = await pool.getConnection(async (conn)=>conn);
 
     try{
@@ -92,23 +93,23 @@ exports.deleteQuestionBoard = async function(boardId,userId){
         const isExist = await communityProvider.checkBoardExist(boardId);
 
         if(isExist.length < 1)
-            return errResponse(baseResponse.CHECK_QUESTION_FAIL);
+            return errResponse(baseResponse.CHECK_BOARD_FAIL);
 
         const myBoard = await communityProvider.checkBoardIsMine(boardId,userId);
 
         if(myBoard.length < 1)
-            return errResponse(baseResponse.UPDATE_QUESTION_DENIED);
+            return errResponse(baseResponse.UPDATE_BOARD_DENIED);
 
         const isQuestion = await communityProvider.getBoardType(boardId);
 
-        if(isQuestion[0].BOARD_TYPE !== 0)
-            return errResponse(baseResponse.WRONG_QUESTION_PATH);
+        if(isQuestion[0].BOARD_TYPE !== type)
+            return errResponse(baseResponse.WRONG_BOARD_PATH);
 
-        const deleteQuestionResult = await communityDao.deleteQuestionBoard(connection,boardId);
+        const deleteResult = await communityDao.deleteBoard(connection,boardId);
 
-        if(deleteQuestionResult.affectedRows === 0) {
+        if(deleteResult[0].affectedRows === 0) {
             await connection.rollback();
-            return errResponse(baseResponse.DELETE_QUESTION_FAIL);
+            return errResponse(baseResponse.DELETE_BOARD_FAIL);
         }
 
         await connection.commit();
