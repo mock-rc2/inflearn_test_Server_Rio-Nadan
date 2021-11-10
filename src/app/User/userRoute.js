@@ -8,7 +8,6 @@ module.exports = function(app){
     // 유저 로그인 API
     app.post('/inflearn/users/login', user.postLoginUsers);
 
-
     // 유저 회원가입 API
     app.post('/inflearn/users/signup',user.postUsers);
 

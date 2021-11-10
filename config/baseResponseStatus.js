@@ -51,6 +51,8 @@ module.exports = {
 
     // Nadan
     CATEGORY_NOT_EXIST : {"isSuccess": false, "code": 2031, "message": "존재하지 않는 카테고리입니다."},
+    COMMUNITY_BLANK_EXIST : {"isSuccess": false, "code": 2032, "message": "빈칸이 존재합니다"},
+    COMMUNITY_TYPE_ERROR : {"isSuccess": false, "code": 2033, "message": "올바른 게시글 타입이 아닙니다."},
 
 
     // Response error
@@ -77,6 +79,14 @@ module.exports = {
     USER_TOKEN_NOT_EXISTENCE: { "isSuccess": false, "code": 3019, "message":"존재하지 않는 토큰 입니다."},
 
     DONT_HAVE_PERMISSION:{ "isSuccess": false, "code": 3020, "message":"권한이 없는 접근입니다."},
+
+    //Nadan
+    INSERT_QUESTION_FAIL:{ "isSuccess": false, "code": 3021, "message":"질문 게시 중 오류가 발생했습니다"},
+    CHECK_QUESTION_FAIL:{ "isSuccess": false, "code": 3022, "message":"존재하지 않는 게시물입니다."},
+    UPDATE_QUESTION_DENIED:{ "isSuccess": false, "code": 3023, "message":"게시물을 수정할 권한이 없습니다."},
+    UPDATE_QUESTION_FAIL:{ "isSuccess": false, "code": 3024, "message":"질문 수정 중 오류가 발생했습니다."},
+    WRONG_QUESTION_PATH:{ "isSuccess": false, "code": 3025, "message":"잘못된 게시글 경로입니다."},
+    DELETE_QUESTION_FAIL : { "isSuccess": false, "code": 3026, "message":"질문 삭제 중 오류가 발생했습니다."},
 
     INSERT_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3041, "message":"강의 공지 작성을 실패하였습니다."},
     UPDATE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 수정을 실패하였습니다."},
