@@ -360,3 +360,47 @@ exports.getLectureInfo = async function(req, res){
     return res.send(response(baseResponse.SUCCESS("조회 성공 하였습니다."), getLectureInfoResult));
 
 }
+
+exports.getDashboardHeader = async function(req,res){
+    const token = req.verifiedToken;
+    const userId = token.userId;
+
+    const lectureId = req.params.lectureId;
+
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
+    const getHeaderResult = await lectureProvider.getDashboardHeader(lectureId,userId);
+
+    return res.send(getHeaderResult);
+
+}
+
+exports.getDashboardQuestion = async function(req,res){
+    const token = req.verifiedToken;
+    const userId = token.userId;
+
+    const lectureId = req.params.lectureId;
+
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
+    const questionCntResult = await lectureProvider.getDashboardQuestionCnt(lectureId,userId);
+
+    return res.send(questionCntResult);
+}
+
+exports.getDashboardCurriculum = async function(req,res){
+    const token = req.verifiedToken;
+    const userId = token.userId;
+
+    const lectureId = req.params.lectureId;
+
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
+    const sessionClasses = await lectureProvider.getDashboardCurriculum(lectureId,userId);
+
+    return res.send(sessionClasses);
+
+}

@@ -7,11 +7,17 @@ module.exports = function(app) {
 
     app.get('/inflearn/community/questions',community.getQuestionsList);
 
-    app.post('/inflearn/community/questions',jwtMiddleware,community.postQuestion);
+    app.get('/inflearn/community/chats',community.getChatList);
 
-    app.patch('/inflearn/community/questions/:boardId',jwtMiddleware,community.updateQuestion);
+    app.get('/inflearn/community/studies',community.getStudyList)
 
-    app.delete('/inflearn/community/questions/:boardId',jwtMiddleware,community.deleteQuestion);
+    app.post('/inflearn/community/:boardType',jwtMiddleware,community.postBoard);
+
+    app.patch('/inflearn/community/:boardType/:boardId',jwtMiddleware,community.updateQuestion);
+
+    app.delete('/inflearn/community/:boardType/:boardId',jwtMiddleware,community.deleteBoard);
+
+    app.get('/inflearn/community/:boardType/:boardId',community.getBoardInfo);
 
     app.get('/inflearn/classes/:classId/community', community.getClassBoard);
 }

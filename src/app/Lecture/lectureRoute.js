@@ -34,5 +34,11 @@ module.exports = function(app){
     app.delete('/inflearn/lectures/:lectureId/notice/:noticeId', jwtMiddleware, lectures.deleteLectureNotice);
 
     app.get('/inflearn/lectures/:lectureId/info', lectures.getLectureInfo);
+
+    app.get('/inflearn/courses/:lectureId/dashboard/header',jwtMiddleware,lectures.getDashboardHeader);
+
+    app.get('/inflearn/courses/:lectureId/dashboard/question',jwtMiddleware,lectures.getDashboardQuestion);
+
+    app.get('/inflearn/courses/:lectureId/dashboard/curriculum',jwtMiddleware,lectures.getDashboardCurriculum);
 };
 

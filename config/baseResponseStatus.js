@@ -83,12 +83,12 @@ module.exports = {
     DONT_HAVE_PERMISSION:{ "isSuccess": false, "code": 3020, "message":"권한이 없는 접근입니다."},
 
     //Nadan
-    INSERT_QUESTION_FAIL:{ "isSuccess": false, "code": 3021, "message":"질문 게시 중 오류가 발생했습니다"},
-    CHECK_QUESTION_FAIL:{ "isSuccess": false, "code": 3022, "message":"존재하지 않는 게시물입니다."},
-    UPDATE_QUESTION_DENIED:{ "isSuccess": false, "code": 3023, "message":"게시물을 수정할 권한이 없습니다."},
-    UPDATE_QUESTION_FAIL:{ "isSuccess": false, "code": 3024, "message":"질문 수정 중 오류가 발생했습니다."},
-    WRONG_QUESTION_PATH:{ "isSuccess": false, "code": 3025, "message":"잘못된 게시글 경로입니다."},
-    DELETE_QUESTION_FAIL : { "isSuccess": false, "code": 3026, "message":"질문 삭제 중 오류가 발생했습니다."},
+    INSERT_BOARD_FAIL:{ "isSuccess": false, "code": 3021, "message":"게시 중 오류가 발생했습니다"},
+    CHECK_BOARD_FAIL:{ "isSuccess": false, "code": 3022, "message":"존재하지 않는 게시물입니다."},
+    UPDATE_BOARD_DENIED:{ "isSuccess": false, "code": 3023, "message":"게시물을 수정할 권한이 없습니다."},
+    UPDATE_BOARD_FAIL:{ "isSuccess": false, "code": 3024, "message":"수정 중 오류가 발생했습니다."},
+    WRONG_BOARD_PATH:{ "isSuccess": false, "code": 3025, "message":"잘못된 게시글 경로입니다."},
+    DELETE_BOARD_FAIL : { "isSuccess": false, "code": 3026, "message":"삭제 중 오류가 발생했습니다."},
 
     INSERT_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3041, "message":"강의 공지 작성을 실패하였습니다."},
     UPDATE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 수정을 실패하였습니다."},
