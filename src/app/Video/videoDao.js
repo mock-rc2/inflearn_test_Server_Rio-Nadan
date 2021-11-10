@@ -1,6 +1,6 @@
 async function selectWatchedVideo(connection, userId, classId) {
     const selectWatchedVideoQuery = `
-        SELECT CLASS_ID, WATCHED_TIME
+        SELECT HISTORY_ID, CLASS_ID, WATCHED_TIME
         FROM USER_CLASS_HISTORIES
         WHERE USER_ID = ? AND CLASS_ID = ?;
     `;
@@ -27,16 +27,16 @@ async function insertWatchedVideo(connection, videoParams) {
     return resultRows
 }
 
-async function updateWatchedVideo(connection, videoParams) {
+async function updateWatchedVideo(connection, updateHistoryParams) {
     const updateWatchedVideoQuery = `
         UPDATE USER_CLASS_HISTORIES
-        SET WATCHED_TIME
-        WHERE USER_ID = ? AND CLASS_ID = ?
+        SET WATCHED_TIME = ?
+        WHERE HISTORY_ID = ?
     `;
 
     const [resultRows] = await connection.query(
         updateWatchedVideoQuery,
-        videoParams
+        updateHistoryParams
     );
 
     return resultRows;

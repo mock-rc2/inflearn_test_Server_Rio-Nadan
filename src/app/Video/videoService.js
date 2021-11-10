@@ -16,7 +16,7 @@ exports.insertWatchedVideo = async function(userId, lectureId, classId) {
         if(insertWatchedTimeResult.affectedRows == 0)
             return response(errResponse(baseResponse.INSERT_WATCHED_VIDEO_TIME_FAIL));
 
-        return response(baseResponse.SUCCESS("첫 강의 시청 저장에 성공하였습니다."), {'CLASS_ID': classId, 'WATCHED_TIME': '00:00'});
+        return response(baseResponse.SUCCESS("첫 강의 시청 저장에 성공하였습니다."), {'HISTORY_ID': insertWatchedTimeResult.insertId, 'CLASS_ID': classId, 'WATCHED_TIME': '00:00'});
     }catch (err){
         await connection.rollback();
         logger.error(`App - insert watched video Service error\n: ${err.message}`);
@@ -26,12 +26,12 @@ exports.insertWatchedVideo = async function(userId, lectureId, classId) {
     }
 }
 
-exports.updateWatchedVideo = async function(userId, classId) {
+exports.updateWatchedVideo = async function(historyId, watchedTime) {
     const connection = await pool.getConnection(async (conn) => conn);
     try{
-        const watchedParams = [userId, classId];
+        const updateParams = [watchedTime, historyId];
 
-        const updateWatchedTimeResult = await videoDao.updateWatchedVideo(connection, watchedParams);
+        const updateWatchedTimeResult = await videoDao.updateWatchedVideo(connection, updateParams);
 
         if(updateWatchedTimeResult.affectedRows == 0)
             return response(errResponse(baseResponse.UPDATE_WATCHED_VIDEO_TIME_FAIL));
