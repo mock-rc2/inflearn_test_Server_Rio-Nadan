@@ -23,11 +23,38 @@ exports.getWatchedVideo = async function (req, res) {
 
     const watchedVideo = await videoProvider.selectWatchedVideo(userId, classId);
 
-    console.log("test",watchedVideo.length );
     if(watchedVideo.length < 1){
         const firstWatchedResult = await videoService.insertWatchedVideo(userId, lectureId, classId);
         return res.send(firstWatchedResult);
     }else{
         return res.send(response(baseResponse.SUCCESS("강의 조회 성공") ,watchedVideo));
     }
+}
+
+exports.putWatchedVideo = async function (req, res){
+    const token = req.verifiedToken;
+    const userId = token.userId;
+    const lectureId = req.params['lectureId'];
+    const classId = req.params['classId'];
+    const watchTime = req.body['watchTime'];
+
+    if(!lectureId)
+        return res.send(errResponse(baseResponse.LECTURE_ID_EMPTY));
+
+    if(!classId)
+        return res.send(errResponse(baseResponse.CLASS_VIDEO_EMPTY));
+
+    const userLectureRow = await lectureProvider.checkUserLecture(userId, lectureId);
+
+    if(userLectureRow.length<1)
+        return res.send(errResponse(baseResponse.CHECK_USER_LECTURES_FAIL));
+
+    const watchedVideoRow = await videoProvider.selectWatchedVideo(userId, classId);
+
+    if(watchedVideoRow.length < 1)
+        return res.send(errResponse(baseResponse.USER_WATCHED_HISTORY_NOT_EXIST));
+    
+    const updateVideoResult = await videoService.updateWatchedVideo(watchedVideoRow[0].HISTORY_ID, watchTime);
+
+    return res.send(updateVideoResult);
 }

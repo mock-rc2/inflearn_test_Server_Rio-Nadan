@@ -83,8 +83,8 @@ module.exports = {
     DELETE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3043, "message":"강의 공지 삭제를 실패하였습니다."},
     KAKAO_LOGIN_FAIL:{ "isSuccess": false, "code": 3044, "message":"카카오 로그인이 실패하였습니다."},
     INSERT_WATCHED_VIDEO_TIME_FAIL:{ "isSuccess": false, "code": 3045, "message":"비디오 저장에 실패 했습니다."},
-    UPDATE_WATCHED_VIDEO_TIME_FAIL:{ "isSuccess": false, "code": 3045, "message":"비디오 저장에 실패 했습니다."},
-
+    UPDATE_WATCHED_VIDEO_TIME_FAIL:{ "isSuccess": false, "code": 3046, "message":"비디오 기록에 실패 했습니다."},
+    USER_WATCHED_HISTORY_NOT_EXIST:{ "isSuccess": false, "code": 3047, "message":"비디오 기록에 실패 했습니다."},
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},
