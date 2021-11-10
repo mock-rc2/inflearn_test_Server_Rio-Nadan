@@ -44,7 +44,7 @@ async function updateWatchedVideo(connection, updateHistoryParams) {
 
 async function selectUserLectureList(connection, userParams) {
     const selectUserLectureListQuery = `
-        SELECT DISTINCT CLASS.CLASS_NAME, IFNULL(CLASS_HIST.IS_COMPLETED, 0) AS IS_COMPLETED
+        SELECT DISTINCT CLASS.CLASS_NAME, CLASS.CLASS_TIME, IFNULL(CLASS_HIST.IS_COMPLETED, 0) AS IS_COMPLETED
         FROM LECTURE_CLASSES AS CLASS
             LEFT OUTER JOIN (SELECT CLASS_ID, IS_COMPLETED
                              FROM USER_CLASS_HISTORIES 
@@ -61,10 +61,26 @@ async function selectUserLectureList(connection, userParams) {
     return resultRows;
 }
 
+async function updateClassLearningInfo(connection, historyId) {
+    const updateUserHistoryQuery = `
+        UPDATE USER_CLASS_HISTORIES
+        SET IS_COMPLETED = 1
+        WHERE HISTORY_ID = ?;
+    `;
+
+    const [resultRow] = await connection.query(
+        updateUserHistoryQuery,
+        historyId
+    );
+
+    return resultRow;
+}
+
 module.exports = {
     selectWatchedVideo,
     insertWatchedVideo,
     updateWatchedVideo,
-    selectUserLectureList
+    selectUserLectureList,
+    updateClassLearningInfo
 }
 
