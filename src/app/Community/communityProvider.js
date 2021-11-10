@@ -47,3 +47,13 @@ exports.getBoardType = async function(boardId){
     connection.release();
     return checkResult;
 }
+
+exports.getClassBoard = async function(boardType, classId){
+    const connection = await pool.getConnection(async (conn)=>conn);
+    const boardParams = [boardType, classId]
+    const getClassBoardResult = await communityDao.selectClassBoard(connection, boardParams)
+
+    connection.release();
+
+    return getClassBoardResult;
+}

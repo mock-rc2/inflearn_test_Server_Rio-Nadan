@@ -48,6 +48,7 @@ module.exports = {
     LECTURE_ID_EMPTY:{"isSuccess": false, "code": 2026, "message": "강의 아이디가 비어있습니다."},
     LECTURE_NOTICE_TITLE_EMPTY:{"isSuccess": false, "code": 2028, "message": "공지 제목이 비어있습니다."},
     CLASS_VIDEO_EMPTY:{"isSuccess": false, "code": 2029, "message": "class 비디오가 비어있습니다."},
+    CLASS_ID_EMPTY:{"isSuccess": false, "code": 2030, "message": "class ID가 비어있습니다."},
 
     // Nadan
     CATEGORY_NOT_EXIST : {"isSuccess": false, "code": 2031, "message": "존재하지 않는 카테고리입니다."},
@@ -55,6 +56,7 @@ module.exports = {
     COMMUNITY_TYPE_ERROR : {"isSuccess": false, "code": 2033, "message": "올바른 게시글 타입이 아닙니다."},
 
 
+    TYPE_ID_WRONG:{"isSuccess": false, "code": 2041, "message": "잘못된 타입 아이디 입니다."},
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3002, "message":"중복된 닉네임입니다." },

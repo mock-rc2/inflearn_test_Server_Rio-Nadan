@@ -91,6 +91,29 @@ async function deleteQuestionBoard(connection,boardId) {
     return result
 }
 
+async function selectClassBoard(connection, params) {
+    const selectClassBoardQuery = `
+        SELECT B.BOARD_ID, B.BOARD_TITLE, B.BOARD_CONTENT, U.NICK_NAME, IFNULL(COMMENTS.COMMENT_CNT, 0)
+        FROM BOARDS AS B
+            INNER JOIN LECTURE_CLASSES AS C
+                ON B.CLASS_ID = C.CLASS_ID
+            INNER JOIN USERS AS U
+                ON B.USER_ID = U.USER_ID
+            LEFT OUTER JOIN(SELECT BOARD_ID, COUNT(ANSWER_ID) AS COMMENT_CNT
+                            FROM ANSWERS
+                            GROUP BY BOARD_ID) AS COMMENTS
+                ON COMMENTS.BOARD_ID = B.BOARD_ID
+        WHERE B.BOARD_TYPE = ? AND B.CLASS_ID = ?;
+    `;
+
+    const [result] = await connection.query(
+        selectClassBoardQuery,
+        params
+    );
+
+    return result
+}
+
 module.exports = {
     selectQuestionList,
     insertQuestion,
@@ -98,5 +121,6 @@ module.exports = {
     checkQuestionBoardIsMine,
     updateQuestionBoard,
     checkBoardType,
-    deleteQuestionBoard
+    deleteQuestionBoard,
+    selectClassBoard
 }

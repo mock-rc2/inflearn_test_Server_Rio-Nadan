@@ -13,4 +13,5 @@ module.exports = function(app) {
 
     app.delete('/inflearn/community/questions/:boardId',jwtMiddleware,community.deleteQuestion);
 
+    app.get('/inflearn/classes/:classId/community', community.getClassBoard);
 }
