@@ -10,3 +10,12 @@ exports.selectWatchedVideo = async function (userId, classId) {
 
     return selectWatchedVideo;
 };
+
+exports.selectUserLectureHistory = async function (userId, sessionId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userParams = [userId, sessionId];
+
+    const selectUserLecture = await videoDao.selectUserLectureList(connection, userParams);
+
+    return selectUserLecture;
+}
