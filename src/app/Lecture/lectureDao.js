@@ -691,6 +691,33 @@ async function selectLectureCurriculum(connection,sessionId){
     return resultRows;
 }
 
+async function selectUserHistories(connection, userId) {
+    const selectUserHistoriesQuery = `
+        SELECT LECTURE_GROUP.LECTURE_ID, LECTURE_GROUP.LECTURE_NAME, LECTURE_GROUP.TITLE_IMAGE, USER_HIST.COMPLETED_COUNT , LECTURE_GROUP.CLASS_COUNT
+        FROM (SELECT HIST.LECTURE_ID AS LECTURE_ID, COUNT(HIST.IS_COMPLETED) AS COMPLETED_COUNT
+                FROM USER_CLASS_HISTORIES AS HIST
+                WHERE HIST.USER_ID = ? AND HIST.IS_COMPLETED = 1
+                GROUP BY HIST.LECTURE_ID
+                LIMIT 2) AS USER_HIST 
+            INNER JOIN
+           (SELECT L.LECTURE_ID AS LECTURE_ID, L.TITLE_IMAGE, L.LECTURE_NAME,COUNT(LC.CLASS_ID) AS CLASS_COUNT
+                FROM LECTURES AS L
+                INNER JOIN LECTURE_SESSION AS LS
+                    ON L.LECTURE_ID = LS.LECTURE_ID
+                INNER JOIN LECTURE_CLASSES AS LC
+                    ON LS.SESSION_ID = LC.SESSION_ID
+                GROUP BY L.LECTURE_ID) AS LECTURE_GROUP
+            ON USER_HIST.LECTURE_ID = LECTURE_GROUP.LECTURE_ID;
+    `;
+
+    const [selectUserHistoriesResult] = await connection.query(
+        selectUserHistoriesQuery,
+        userId
+    );
+
+    return selectUserHistoriesResult;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -737,7 +764,7 @@ module.exports = {
     filterMiddleLectureList,
     selectProgress,
     selectQuestionList,
-    selectLectureCurriculum
-
+    selectLectureCurriculum,
+    selectUserHistories
 
 };
