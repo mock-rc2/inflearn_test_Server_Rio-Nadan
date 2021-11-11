@@ -640,6 +640,57 @@ async function selectReviewsLowGPA(connection, lectureId) {
     return resultRows;
 }
 
+async function selectProgress(connection,lectureId,userId) {
+    const selectProgressQuery = `
+    select 
+        count(LC.CLASS_ID) as allCnt ,count(sub.CLASS_ID) as completeCnt
+    from LECTURE_CLASSES LC
+    inner join LECTURE_SESSION LS on LC.SESSION_ID = LS.SESSION_ID
+    inner join LECTURES L on LS.LECTURE_ID = L.LECTURE_ID
+    left join (select LECTURE_ID,CLASS_ID
+            from USER_CLASS_HISTORIES
+                where IS_COMPLETED = 1 AND USER_ID = ?) as sub
+    on LC.CLASS_ID = sub.CLASS_ID
+where L.LECTURE_ID = ?;
+    `;
+
+    const [resultRow] = await connection.query(selectProgressQuery,[userId,lectureId]);
+
+    return resultRow;
+}
+
+async function selectQuestionList(connection,lectureId) {
+    const getQuestionListQuery = `
+    select 
+        L.LECTURE_ID,BOARD_TITLE,date_format(BOARDS.CREATED_AT,'%Y.%m.%d') as DATE
+    from BOARDS
+left join LECTURE_CLASSES LC on BOARDS.CLASS_ID = LC.CLASS_ID
+left join LECTURE_SESSION LS on LC.SESSION_ID = LS.SESSION_ID
+left join LECTURES L on LS.LECTURE_ID = L.LECTURE_ID
+where L.LECTURE_ID = ? AND BOARD_TYPE = 0 AND BOARDS.STATUS = 'active'
+order by BOARDS.CREATED_AT desc
+limit 10;
+    `;
+
+    const [resultRow] = await connection.query(getQuestionListQuery,lectureId);
+    return resultRow;
+}
+
+async function selectLectureCurriculum(connection,sessionId){
+    const selectSessionClassesQuery = `
+        SELECT CLASS_ID, CLASS_NAME
+        FROM LECTURE_CLASSES
+        WHERE SESSION_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectSessionClassesQuery,
+        sessionId
+    );
+
+    return resultRows;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -683,7 +734,10 @@ module.exports = {
     buildQuery,
     filterLectureList,
     filterBigLectureList,
-    filterMiddleLectureList
+    filterMiddleLectureList,
+    selectProgress,
+    selectQuestionList,
+    selectLectureCurriculum
 
 
 };

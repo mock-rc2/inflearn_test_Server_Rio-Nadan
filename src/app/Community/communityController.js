@@ -21,7 +21,8 @@ exports.getBoardsRedirect = async function(req,res){
  */
 exports.getQuestionsList = async function(req,res){
 
-    const getQuestionList = await communityProvider.getQuestionList();
+    const type = 0;
+    const getQuestionList = await communityProvider.getBoardList(type);
 
     return res.send(response(baseResponse.SUCCESS("질문 목록 조회에 성공하였습니다"),getQuestionList));
 }
@@ -29,10 +30,10 @@ exports.getQuestionsList = async function(req,res){
 /**
  * API No.
  * API Name : 질문글 작성 API
- * [POST] /inflearn/community/questions
+ * [POST] /inflearn/community/{boardType}
  */
 
-exports.postQuestion = async function(req,res){
+exports.postBoard = async function(req,res){
 
     /**
      * Body : {type,title,contents}
@@ -41,70 +42,97 @@ exports.postQuestion = async function(req,res){
     const token = req.verifiedToken;
     const userId = token.userId;
 
+    const boardType = req.params.boardType;
     const type = req.body.type;
     const title = req.body.title;
     const content = req.body.content;
     const classId = req.body.classId;
 
     let typeDescription;
+    let postParams;
+
+
+    if(boardType === 'questions' || boardType === 'chats'|| boardType === 'studies') {
+        switch (type){
+            case 0:
+                typeDescription = '질문/답변';
+                break;
+            case 1:
+                typeDescription = '자유주제';
+                break;
+            case 2:
+                typeDescription = '스터디 모집';
+                break;
+            default:
+                return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+                break;
+        }
+    }else {
+        return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR))
+    }
+
 
     if(!title || !content)
         return res.send(errResponse(baseResponse.COMMUNITY_BLANK_EXIST));
 
-    switch (type){
-        case 0:
-            typeDescription = '질문/답변';
-            break;
-        case 1:
-            typeDescription = '자유주제';
-            break;
-        case 2:
-            typeDescription = '스터디 모집';
-            break;
-        default:
-            return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
-            break;
-    }
 
-    let postQuestionParams;
+
 
     if(!classId) {
-        postQuestionParams = [userId,title,content,type,typeDescription];
+        postParams = [userId,title,content,type,typeDescription];
     }
     else {
-        postQuestionParams = [classId,userId,title,content,type,typeDescription];
+        postParams = [classId,userId,title,content,type,typeDescription];
     }
 
 
-    const postQuestionBoard = await communityService.insertQuestionBoard(postQuestionParams);
+    const postBoard = await communityService.insertBoard(postParams);
 
-    return res.send(postQuestionBoard);
+    return res.send(postBoard);
 
 }
 /**
  * API No.
  * API Name : 질문글 수정 API
- * [PATCH] /inflearn/community/questions/{boardId}
+ * [PATCH] /inflearn/community/{boardType}/{boardId}
  */
 
 exports.updateQuestion = async function(req,res){
 
     /**
-     * Path Variable : boardId
+     * Path Variable : boardId , boardType
      * Body : {title,contents}
      */
 
     const token = req.verifiedToken;
     const userId = token.userId;
 
+    const boardType = req.params.boardType;
     const boardId = req.params.boardId;
     const title = req.body.title;
     const content = req.body.content;
 
+    let type = 0;
+
+    switch (boardType){
+        case 'questions':
+            type = 0;
+            break;
+        case 'chats':
+            type = 1;
+            break;
+        case 'studies':
+            type = 2;
+            break;
+        default:
+            return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+            break;
+    }
+
     if(!title || !content)
         return res.send(errResponse(baseResponse.COMMUNITY_BLANK_EXIST));
 
-    const patchQuestionBoard = await communityService.updateQuestionBoard(title,content,boardId,userId);
+    const patchQuestionBoard = await communityService.updateQuestionBoard(title,content,boardId,userId,type);
 
     return res.send(patchQuestionBoard);
 
@@ -113,21 +141,84 @@ exports.updateQuestion = async function(req,res){
 /**
  * API No.
  * API Name : 질문글 삭제 API
- * [DELETE] /inflearn/community/questions/{boardId}
+ * [DELETE] /inflearn/community/{boardType}/{boardId}
  */
-exports.deleteQuestion = async function(req,res){
+exports.deleteBoard = async function(req,res){
     /**
-     * Path Variable : boardId
+     * Path Variable : boardId,boardType
      */
 
     const token = req.verifiedToken;
     const userId = token.userId;
 
+    const boardType = req.params.boardType;
     const boardId = req.params.boardId;
 
-    const deleteQuestionBoard = await communityService.deleteQuestionBoard(boardId,userId);
+    let type = 0;
 
-    return res.send(deleteQuestionBoard)
+
+    switch (boardType){
+        case 'questions':
+            type = 0;
+            break;
+        case 'chats':
+            type = 1;
+            break;
+        case 'studies':
+            type = 2;
+            break;
+        default:
+            return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+            break;
+    }
+
+    const deleteBoard = await communityService.deleteBoard(boardId,userId,type);
+
+    return res.send(deleteBoard)
+
+}
+
+exports.getChatList = async function(req,res){
+
+    const type = 1;
+    const getChatList = await communityProvider.getBoardList(type);
+
+    return res.send(response(baseResponse.SUCCESS("자유주제 토론 글 목록 조회에 성공하였습니다"),getChatList));
+
+}
+
+exports.getStudyList = async function(req,res){
+    const type = 2;
+    const getStudyList = await communityProvider.getBoardList(type)
+
+    return res.send(response(baseResponse.SUCCESS("스터디 모집 글 목록 조회에 성공하였습니다"),getStudyList));
+}
+
+exports.getBoardInfo = async function(req,res){
+
+    const boardType = req.params.boardType;
+    const boardId = req.params.boardId;
+
+    let type = 0;
+
+    switch (boardType){
+        case 'questions':
+            type = 0;
+            break;
+        case 'chats':
+            type = 1;
+            break;
+        case 'studies':
+            type = 2;
+            break;
+        default:
+            return res.send(errResponse(baseResponse.COMMUNITY_TYPE_ERROR));
+            break;
+    }
+
+    const getBoardInfo = await communityProvider.getBoardInfo(type,boardId);
+
+    return res.send(getBoardInfo);
 
 }
 

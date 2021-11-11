@@ -8,14 +8,15 @@ const communityService = require("../Community/communityService");
 const userDao = require("../User/userDao");
 const lectureDao = require("../Lecture/lectureDao");
 const {query} = require("winston");
+const communityProvider = require("../Community/communityProvider");
 
-exports.getQuestionList = async function(){
+exports.getBoardList = async function(type){
     const connection = await pool.getConnection(async (conn)=> conn);
 
-    const selectQuestionListResult = await communityDao.selectQuestionList(connection);
+    const selectBoardsListResult = await communityDao.selectBoardList(connection,type);
 
     connection.release();
-    return selectQuestionListResult;
+    return selectBoardsListResult;
 
 }
 
@@ -48,12 +49,36 @@ exports.getBoardType = async function(boardId){
     return checkResult;
 }
 
-exports.getClassBoard = async function(boardType, classId){
-    const connection = await pool.getConnection(async (conn)=>conn);
+
+exports.getClassBoard = async function(boardType, classId) {
+    const connection = await pool.getConnection(async (conn) => conn);
     const boardParams = [boardType, classId]
     const getClassBoardResult = await communityDao.selectClassBoard(connection, boardParams)
 
     connection.release();
 
     return getClassBoardResult;
+}
+
+exports.getBoardInfo = async function(type,boardId){
+
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const isExist = await communityProvider.checkBoardExist(boardId);
+
+    if(isExist.length < 1)
+        return errResponse(baseResponse.CHECK_BOARD_FAIL);
+
+    const isBoardType = await communityProvider.getBoardType(boardId);
+
+    if(isBoardType[0].BOARD_TYPE !== type)
+        return errResponse(baseResponse.WRONG_BOARD_PATH);
+
+    const boardResult = await communityDao.selectBoardInfo(connection,boardId,type);
+
+    connection.release();
+
+    return response(baseResponse.SUCCESS("게시글 조회에 성공했습니다"),boardResult);
+
+
 }
