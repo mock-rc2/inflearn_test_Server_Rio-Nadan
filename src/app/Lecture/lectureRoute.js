@@ -44,6 +44,8 @@ module.exports = function(app){
 
     app.post('/inflearn/users/wishlist/items', jwtMiddleware, wishList.postWishListItem);
 
-    app.get('/inflearn/users/wishlist/items', jwtMiddleware, wishList.getWishListItem)
+    app.get('/inflearn/users/wishlist/items', jwtMiddleware, wishList.getWishListItem);
+
+    app.delete('/inflearn/users/wishlist/items', jwtMiddleware, wishList.deleteWishListItem);
 };
 

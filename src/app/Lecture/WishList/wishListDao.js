@@ -57,9 +57,40 @@ async function selectWishListItems(connection, wishListId) {
     return selectWishListResult;
 }
 
+async function selectWishListItem(connection, lectureId, wishListId){
+    const selectWishListQuery = `
+        SELECT WISH_LIST_ID, LECTURE_ID
+        FROM WISH_LIST_ITEM
+        WHERE LECTURE_ID = ? AND WISH_LIST_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        selectWishListQuery,
+        [lectureId, wishListId]
+    );
+
+    return resultRows;
+}
+
+async function deleteWishListItems(connection, lectureId, wishListId) {
+    const deleteWishList = `
+        DELETE
+        FROM WISH_LIST_ITEM
+        WHERE LECTURE_ID = ? AND WISH_LIST_ID = ?;
+    `;
+
+    const [resultRows] = await connection.query(
+        deleteWishList,
+        [lectureId, wishListId]
+    );
+
+    return resultRows;
+}
 module.exports = {
     insertWishList,
     selectWishList,
     insertWishListItem,
-    selectWishListItems
+    selectWishListItems,
+    deleteWishListItems,
+    selectWishListItem
 }

@@ -50,3 +50,31 @@ exports.getWishListItem = async function(req, res) {
 
     return res.send(selectResult);
 }
+
+exports.deleteWishListItem = async function(req, res) {
+
+    const token = req.verifiedToken;
+
+    const userId = token.userId;
+
+    const lectureId = req.body.lectureId;
+
+    const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
+
+    let wishListId;
+
+    if(wishListCheckRows.length < 1){
+        return res.send(errResponse(baseResponse.USER_WISH_LIST_NOT_EXIST));
+    }else{
+        wishListId = wishListCheckRows[0].WISH_LIST_ID;
+    }
+
+    const checkResult = await wishListProvider.checkWishListItem(lectureId, wishListId);
+
+    if(checkResult.length < 1)
+        return res.send(errResponse(baseResponse.USER_WISH_LIST_ITEM_NOT_EXIST));
+
+    const deleteResult = await wishListService.deleteWishListItem(wishListId, lectureId);
+
+    return res.send(deleteResult);
+}

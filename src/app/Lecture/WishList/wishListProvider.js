@@ -23,3 +23,11 @@ exports.selectWishListItems = async function(wishListId){
 
     return resultRows;
 }
+
+exports.checkWishListItem = async function(lectureId, wishListId) {
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const resultRows = await wishListDao.selectWishListItem(connection, lectureId, wishListId);
+
+    return resultRows;
+}
