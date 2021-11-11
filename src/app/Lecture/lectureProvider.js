@@ -234,8 +234,8 @@ exports.selectLecturePreviewCount = async function (lectureId) {
 }
 
 exports.selectLectureCategory = async function (lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
     try{
-        const connection = await pool.getConnection(async (conn) => conn);
         const selectLectureTagRows = await lectureDao.selectLectureCategory(connection, lectureId);
 
         if (!selectLectureTagRows) return [];
