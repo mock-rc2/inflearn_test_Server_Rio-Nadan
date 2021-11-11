@@ -58,6 +58,7 @@ module.exports = {
 
     TYPE_ID_WRONG:{"isSuccess": false, "code": 2041, "message": "잘못된 타입 아이디 입니다."},
     USER_WISH_LIST_NOT_EXIST:{"isSuccess": false, "code": 2042, "message": "유저 위시리스트가 없습니다."},
+    USER_WISH_LIST_ITEM_NOT_EXIST:{"isSuccess": false, "code": 2043, "message": "유저 위시리스트 아이템이 없습니다."},
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3002, "message":"중복된 닉네임입니다." },
@@ -101,6 +102,8 @@ module.exports = {
     USER_UPDATE_CLASS_COMPLETE_FAIL:{ "isSuccess": false, "code": 3048, "message":"강의 완료가 실패 하였습니다"},
     CREATE_WISH_LIST_FAIL:{ "isSuccess": false, "code": 3049, "message":"위시리스트 생성에 실패 하였습니다."},
     INSERT_WISH_LIST_ITEM_FAIL:{ "isSuccess": false, "code": 3050, "message":"위시리스트 아이템 저장에 실패 하였습니다."},
+
+    DELETE_WISH_LIST_ITEM_FAIL:{ "isSuccess": false, "code": 3061, "message":"위시리스트 아이템 삭제에 실패 하였습니다."},
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

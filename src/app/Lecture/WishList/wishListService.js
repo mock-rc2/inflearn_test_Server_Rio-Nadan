@@ -44,3 +44,22 @@ exports.insertWishListItem = async function (wishListId, lectureId) {
         connection.release();
     }
 }
+
+exports.deleteWishListItem = async function(wishListId, lectureId) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try{
+        const resultRows = await wishListDao.deleteWishListItems(connection, lectureId, wishListId);
+
+        if(resultRows.affectedRows == 0)
+            return errResponse(baseResponse.DELETE_WISH_LIST_ITEM_FAIL);
+
+        return response(baseResponse.SUCCESS("위시리스트 삭제 성공"))
+    }catch (err){
+        await connection.rollback();
+        logger.error(`App - deleteWishListItem Service error\n: ${err.message}`);
+        return errResponse(baseResponse.SERVER_ERROR);
+    }
+    finally{
+        connection.release();
+    }
+}
