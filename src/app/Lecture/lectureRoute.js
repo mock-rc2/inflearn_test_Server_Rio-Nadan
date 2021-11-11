@@ -1,4 +1,5 @@
 const lectures = require('./lectureController');
+const wishList = require('./WishList/wishListController');
 const jwtMiddleware = require('../../../config/jwtMiddleware');
 
 module.exports = function(app){
@@ -40,5 +41,7 @@ module.exports = function(app){
     app.get('/inflearn/courses/:lectureId/dashboard/question',jwtMiddleware,lectures.getDashboardQuestion);
 
     app.get('/inflearn/courses/:lectureId/dashboard/curriculum',jwtMiddleware,lectures.getDashboardCurriculum);
+
+    app.post('/inflearn/users/wishlist/item', jwtMiddleware, wishList.postWishListItem);
 };
 

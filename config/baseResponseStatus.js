@@ -98,6 +98,9 @@ module.exports = {
     UPDATE_WATCHED_VIDEO_TIME_FAIL:{ "isSuccess": false, "code": 3046, "message":"시청 기록에 실패 했습니다."},
     USER_WATCHED_HISTORY_NOT_EXIST:{ "isSuccess": false, "code": 3047, "message":"유저가 시청한 기록이 없습니다."},
     USER_UPDATE_CLASS_COMPLETE_FAIL:{ "isSuccess": false, "code": 3048, "message":"강의 완료가 실패 하였습니다"},
+    CREATE_WISH_LIST_FAIL:{ "isSuccess": false, "code": 3049, "message":"위시리스트 생성에 실패 하였습니다."},
+    INSERT_WISH_LIST_ITEM_FAIL:{ "isSuccess": false, "code": 3050, "message":"위시리스트 아이템 저장에 실패 하였습니다."},
+
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},
