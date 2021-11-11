@@ -1,8 +1,11 @@
 async function selectWatchedVideo(connection, userId, classId) {
     const selectWatchedVideoQuery = `
-        SELECT HISTORY_ID, CLASS_ID, WATCHED_TIME
-        FROM USER_CLASS_HISTORIES
-        WHERE USER_ID = ? AND CLASS_ID = ?;
+        SELECT CLASS_HIST.HISTORY_ID, CLASS_HIST.CLASS_ID, CLASS_HIST.WATCHED_TIME, CLASS.CLASS_VIDEO_URL
+        FROM USER_CLASS_HISTORIES AS CLASS_HIST
+                 INNER JOIN LECTURE_CLASSES AS CLASS
+                            ON CLASS_HIST.CLASS_ID = CLASS.CLASS_ID
+        WHERE CLASS_HIST.USER_ID = ?
+          AND CLASS_HIST.CLASS_ID = ?
     `;
 
     const [resultRows] = await connection.query(
