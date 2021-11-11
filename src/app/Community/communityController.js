@@ -7,32 +7,20 @@ const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 const requestHandler = require("../../../config/requestHandler")
 const regexEmail = require("regex-email");
-const typeSet = new Set([0,1,2])
+const typeSet = new Set([0,1,2]);
 
 exports.getBoardsRedirect = async function(req,res){
 
     return res.redirect('/inflearn/community/questions');
 }
 
-/**
- * API No.
- * API Name : 질문글 목록 조회 API
- * [GET] /inflearn/community/questions
- */
-exports.getQuestionsList = async function(req,res){
 
-    const type = 0;
-    const getQuestionList = await communityProvider.getBoardList(type);
-
-    return res.send(response(baseResponse.SUCCESS("질문 목록 조회에 성공하였습니다"),getQuestionList));
-}
 
 /**
  * API No.
  * API Name : 질문글 작성 API
  * [POST] /inflearn/community/{boardType}
  */
-
 exports.postBoard = async function(req,res){
 
     /**
@@ -178,10 +166,50 @@ exports.deleteBoard = async function(req,res){
 
 }
 
+/**
+ * API No.
+ * API Name : 질문글 목록 조회 API
+ * [GET] /inflearn/community/questions
+ */
+exports.getQuestionsList = async function(req,res){
+
+    const type = 0;
+    const sortQuery = req.query.order;
+    let page = req.query.page;
+    const pageSize = 5;
+
+    let getQuestionList;
+    if(!page){
+        page = 1;
+    }
+
+    if(!sortQuery){
+        getQuestionList= await communityProvider.getBoardList(type,page,pageSize);
+    }else{
+        getQuestionList = await communityProvider.getBoardListSort(type,sortQuery,page,pageSize);
+    }
+
+
+    return res.send(getQuestionList);
+}
+
 exports.getChatList = async function(req,res){
 
     const type = 1;
-    const getChatList = await communityProvider.getBoardList(type);
+    let page = req.query.page;
+    const sortQuery = req.query.order
+    const pageSize = 5;
+
+    let getChatList;
+    if(!page){
+        page = 1;
+    }
+
+    if(!sortQuery){
+        getChatList= await communityProvider.getBoardList(type,page,pageSize);
+    }else{
+        getChatList = await communityProvider.getBoardListSort(type,sortQuery,page,pageSize);
+    }
 
     return res.send(response(baseResponse.SUCCESS("자유주제 토론 글 목록 조회에 성공하였습니다"),getChatList));
 
@@ -189,7 +217,20 @@ exports.getChatList = async function(req,res){
 
 exports.getStudyList = async function(req,res){
     const type = 2;
-    const getStudyList = await communityProvider.getBoardList(type)
+    let page = req.query.page;
+    const sortQuery = req.query.order
+    const pageSize = 5;
+
+    let getStudyList;
+    if(!page){
+        page = 1;
+    }
+
+    if(!sortQuery){
+        getStudyList= await communityProvider.getBoardList(type,page,pageSize);
+    }else{
+        getStudyList = await communityProvider.getBoardListSort(type,sortQuery,page,pageSize);
+    }
 
     return res.send(response(baseResponse.SUCCESS("스터디 모집 글 목록 조회에 성공하였습니다"),getStudyList));
 }

@@ -9,7 +9,7 @@ module.exports = function(app) {
 
     app.get('/inflearn/community/chats',community.getChatList);
 
-    app.get('/inflearn/community/studies',community.getStudyList)
+    app.get('/inflearn/community/studies',community.getStudyList);
 
     app.post('/inflearn/community/:boardType',jwtMiddleware,community.postBoard);
 

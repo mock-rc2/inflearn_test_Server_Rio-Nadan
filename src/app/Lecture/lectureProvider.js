@@ -7,14 +7,15 @@ const userDao = require("../User/userDao");
 const lectureDao = require("./lectureDao");
 const lectureProvider = require("./lectureProvider");
 const {query} = require("winston");
+const communityDao = require("../Community/communityDao");
 
 exports.getFilterLectureList = async function(tagRow) {
     const connection = await pool.getConnection(async (conn)=>conn);
+
     try{
         if(tagRow){
             let tags = tagRow.split(',');
             let where = await lectureDao.buildQuery(tags);
-
 
             const lectureResultFilter = await lectureDao.filterLectureList(connection,where);
 
@@ -36,26 +37,28 @@ exports.getFilterLectureList = async function(tagRow) {
 
             return lectureResultFilter;
 
+        }else{
+
+            const lectureResult = await lectureDao.selectLectureList(connection);
+
+            for (const row of lectureResult) {
+                row.MIDDLE_CATEGORY_NAME = [];
+                row.TAG = [];
+
+                const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+                await middleResult.forEach((m) => {
+                    row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
+                });
+
+                const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+                await tagResult.forEach((t)=>{
+                    row.TAG.push(t.CATEGORY_TAG_NAME);
+                })
+            }
+
+            return lectureResult;
         }
 
-        const lectureResult = await lectureDao.selectLectureList(connection);
-
-        for (const row of lectureResult) {
-            row.MIDDLE_CATEGORY_NAME = [];
-            row.TAG = [];
-
-            const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
-            await middleResult.forEach((m) => {
-                row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
-            });
-
-            const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
-            await tagResult.forEach((t)=>{
-                row.TAG.push(t.CATEGORY_TAG_NAME);
-            })
-        }
-
-        return lectureResult;
     }finally {
         connection.release();
     }
@@ -97,33 +100,34 @@ exports.getLectureList = async function(bigCategoryName,tagRow) {
 
             return lectureResultFilter;
 
+        }else{
+
+            const lectureResult = await lectureDao.selectTopLectureList(connection,bigCategoryName);
+
+            for (const row of lectureResult) {
+                row.MIDDLE_CATEGORY_NAME = [];
+                row.TAG = [];
+
+                const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
+                await middleResult.forEach((m) => {
+                    row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
+                });
+
+                const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
+                await tagResult.forEach((t)=>{
+                    row.TAG.push(t.CATEGORY_TAG_NAME);
+                })
+            }
+
+            return lectureResult;
         }
 
-        const lectureResult = await lectureDao.selectTopLectureList(connection,bigCategoryName);
-
-        for (const row of lectureResult) {
-            row.MIDDLE_CATEGORY_NAME = [];
-            row.TAG = [];
-
-            const middleResult = await lectureDao.selectLectureMiddle(connection,row.LECTURE_ID);
-            await middleResult.forEach((m) => {
-                row.MIDDLE_CATEGORY_NAME.push(m.MIDDLE_CATEGORY_NAME);
-            });
-
-            const tagResult = await lectureDao.selectLectureTag(connection,row.LECTURE_ID);
-            await tagResult.forEach((t)=>{
-                row.TAG.push(t.CATEGORY_TAG_NAME);
-            })
-        }
-
-        return lectureResult;
     }finally {
         connection.release();
     }
 }
 
 exports.getMiddleLectureList = async function(bigCategoryName,middleCategoryName,tagRow) {
-
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         if (tagRow) {
@@ -175,6 +179,7 @@ exports.getMiddleLectureList = async function(bigCategoryName,middleCategoryName
     }
 }
 
+
 exports.checkMiddleCategoryList = async function(bigCategoryName,middleCategoryName){
     const connection = await pool.getConnection(async (conn) => conn);
     const checkResult = await lectureDao.checkMiddleCategory(connection,bigCategoryName,middleCategoryName);
@@ -205,7 +210,6 @@ exports.selectLectureHeader = async function (lectureId) {
 
     return selectHeaderRows[0];
 }
-
 exports.selectLectureStudentCount = async function (lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
     try{
@@ -232,7 +236,6 @@ exports.selectLecturePreviewCount = async function (lectureId) {
     }
 
 }
-
 exports.selectLectureCategory = async function (lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
     try{
@@ -246,19 +249,19 @@ exports.selectLectureCategory = async function (lectureId) {
     }
 }
 
+
 exports.selectLectureTags = async function (lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
-    try{
+    try {
         const selectLectureTagRows = await lectureDao.selectLectureTags(connection, lectureId);
 
         if (!selectLectureTagRows) return [];
 
         return selectLectureTagRows;
-    }finally {
+    } finally {
         connection.release();
     }
 }
-
 
 exports.selectLectureIntroduction = async function (lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -275,32 +278,32 @@ exports.selectLectureSessions = async function(lectureId) {
 
     return selectLectureSessionRows;
 }
+    exports.selectSessionClasses = async function (sessionId) {
+        const connection =  await pool.getConnection(async (conn) => conn);
+        try{
+            const selectClasses = await lectureDao.selectSessionClasses(connection, sessionId);
 
-exports.selectSessionClasses = async function (sessionId) {
-    const connection =  await pool.getConnection(async (conn) => conn);
-    try{
-        const selectClasses = await lectureDao.selectSessionClasses(connection, sessionId);
+            if(!selectClasses) return [];
 
-        if(!selectClasses) return [];
-
-        return selectClasses;
-    }finally {
-        connection.release();
+            return selectClasses;
+        }finally {
+            connection.release();
+        }
     }
-}
 
-exports.selectLectureReviews = async function (lectureId) {
-    const connection =  await pool.getConnection(async (conn) => conn);
-    try{
-        const selectReviews = await lectureDao.selectLectureReviews(connection, lectureId);
 
-        if(!selectReviews) return [];
+    exports.selectLectureReviews = async function (lectureId) {
+        const connection =  await pool.getConnection(async (conn) => conn);
+        try{
+            const selectReviews = await lectureDao.selectLectureReviews(connection, lectureId);
 
-        return selectReviews;
-    }finally {
-        connection.release();
+            if(!selectReviews) return [];
+
+            return selectReviews;
+        }finally {
+            connection.release();
+        }
     }
-}
 
 exports.checkUserLectureReview = async function (userId, reviewId) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -330,6 +333,7 @@ exports.checkLectureUser = async function (userId, lectureId) {
 exports.selectLectureInfo = async function(lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
     const selectLectureInfo = await lectureDao.selectLectureInfo(connection, lectureId);
+
     connection.release();
 
     return selectLectureInfo[0];
@@ -361,97 +365,97 @@ exports.selectReviewLowGPA = async function(lectureId){
 
 exports.getDashboardHeader = async function(lectureId,userId){
     const connection = await pool.getConnection(async (conn)=>conn);
-    try{
-        const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+        try{
+            const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-        if(checkLectureRow.length < 1)
-            return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
+            if(checkLectureRow.length < 1)
+                return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
 
-        const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+            const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
 
-        if(checkUserLecture.length < 1)
-            return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
+            if(checkUserLecture.length < 1)
+                return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
 
-        let lectureHeaderRows = await lectureProvider.selectLectureHeader(lectureId);
+            let lectureHeaderRows = await lectureProvider.selectLectureHeader(lectureId);
 
-        lectureHeaderRows.studentCount = await lectureProvider.selectLectureStudentCount(lectureId);
+            lectureHeaderRows.studentCount = await lectureProvider.selectLectureStudentCount(lectureId);
 
-        lectureHeaderRows.previewCount = await lectureProvider.selectLecturePreviewCount(lectureId);
+            lectureHeaderRows.previewCount = await lectureProvider.selectLecturePreviewCount(lectureId);
 
-        lectureHeaderRows.category = await lectureProvider.selectLectureCategory(lectureId);
+            lectureHeaderRows.category = await lectureProvider.selectLectureCategory(lectureId);
 
-        lectureHeaderRows.tags = await lectureProvider.selectLectureTags(lectureId);
+            lectureHeaderRows.tags = await lectureProvider.selectLectureTags(lectureId);
 
-        lectureHeaderRows.lectureProgress = await lectureDao.selectProgress(connection,lectureId,userId);
+            lectureHeaderRows.lectureProgress = await lectureDao.selectProgress(connection,lectureId,userId);
 
-        let allClassCnt = lectureHeaderRows.lectureProgress[0].allCnt;
-        let completeClassCnt = lectureHeaderRows.lectureProgress[0].completeCnt;
-        let progressRate = ((completeClassCnt/allClassCnt)*100).toFixed(2);
+            let allClassCnt = lectureHeaderRows.lectureProgress[0].allCnt;
+            let completeClassCnt = lectureHeaderRows.lectureProgress[0].completeCnt;
+            let progressRate = ((completeClassCnt/allClassCnt)*100).toFixed(2);
 
-        lectureHeaderRows.lectureProgress = [{'allClassCnt' :allClassCnt,'completeClassCnt' :completeClassCnt,'progressRate' :progressRate + '%'}];
+            lectureHeaderRows.lectureProgress = [{'allClassCnt' :allClassCnt,'completeClassCnt' :completeClassCnt,'progressRate' :progressRate + '%'}];
 
-        return response(baseResponse.SUCCESS("헤더 정보를 가져왔습니다"),lectureHeaderRows);
-    }finally {
-        connection.release();
+            return response(baseResponse.SUCCESS("헤더 정보를 가져왔습니다"),lectureHeaderRows);
+        }finally {
+            connection.release();
+        }
     }
-}
 
 exports.getDashboardQuestionCnt = async function(lectureId,userId){
     const connection = await pool.getConnection(async (conn)=>conn);
-    try{
-        const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+        try{
+            const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-        if(checkLectureRow.length < 1)
-            return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
+            if(checkLectureRow.length < 1)
+                return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
 
-        const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+            const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
 
-        if(checkUserLecture.length < 1)
-            return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
+            if(checkUserLecture.length < 1)
+                return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
 
-        const getQuestionCnt = await lectureDao.selectQuestionList(connection,lectureId);
+            const getQuestionCnt = await lectureDao.selectQuestionList(connection,lectureId);
 
-        return response(baseResponse.SUCCESS("질문 목록 조회에 성공하였습니다"),getQuestionCnt);
-    }finally {
-        connection.release();
+            return response(baseResponse.SUCCESS("질문 목록 조회에 성공하였습니다"),getQuestionCnt);
+        }finally {
+            connection.release();
+        }
     }
-}
 
 exports.getDashboardCurriculum = async function(lectureId,userId){
 
     const connection = await pool.getConnection(async (conn)=>conn);
-    try{
-        const checkLectureRow = await lectureProvider.checkLecture(lectureId);
+        try{
+            const checkLectureRow = await lectureProvider.checkLecture(lectureId);
 
-        if(checkLectureRow.length < 1)
-            return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
+            if(checkLectureRow.length < 1)
+                return errResponse(baseResponse.LECTURE_NOT_EXISTENCE);
 
-        const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
+            const checkUserLecture = await lectureProvider.checkUserLecture(userId, lectureId);
 
-        if(checkUserLecture.length < 1)
-            return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
+            if(checkUserLecture.length < 1)
+                return errResponse(baseResponse.CHECK_USER_LECTURES_FAIL);
 
-        let sessionRows = await lectureProvider.selectLectureSessions(lectureId);
+            let sessionRows = await lectureProvider.selectLectureSessions(lectureId);
 
-        if(!sessionRows)
-            return errResponse(baseResponse.GET_LECTURE_SESSION_FAIL);
+            if(!sessionRows)
+                return errResponse(baseResponse.GET_LECTURE_SESSION_FAIL);
 
-        for(let i = 0; i<sessionRows.length; i++) {
-            sessionRows[i].CLASS = await lectureDao.selectLectureCurriculum(connection,sessionRows[i].SESSION_ID);
+            for(let i = 0; i<sessionRows.length; i++) {
+                sessionRows[i].CLASS = await lectureDao.selectLectureCurriculum(connection,sessionRows[i].SESSION_ID);
+            }
+
+            return response(baseResponse.SUCCESS("강의 세션 목록 조회에 성공하였습니다"),sessionRows)
+        }finally {
+            connection.release();
         }
 
-        return response(baseResponse.SUCCESS("강의 세션 목록 조회에 성공하였습니다"),sessionRows)
-    }finally {
-        connection.release();
-    }
 }
 
 exports.getUserHistories = async function(userId) {
     const connection = await pool.getConnection(async (conn)=>conn);
 
-    const userHistoriesResult = await lectureDao.selectUserHistories(connection, userId);
+        const userHistoriesResult = await lectureDao.selectUserHistories(connection, userId);
 
-    connection.release();
-
-    return userHistoriesResult;
+        connection.release();
+        return userHistoriesResult;
 }

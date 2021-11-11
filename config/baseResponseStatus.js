@@ -54,6 +54,7 @@ module.exports = {
     CATEGORY_NOT_EXIST : {"isSuccess": false, "code": 2031, "message": "존재하지 않는 카테고리입니다."},
     COMMUNITY_BLANK_EXIST : {"isSuccess": false, "code": 2032, "message": "빈칸이 존재합니다"},
     COMMUNITY_TYPE_ERROR : {"isSuccess": false, "code": 2033, "message": "올바른 게시글 타입이 아닙니다."},
+    SORT_TYPE_ERROR : {"isSuccess": false, "code": 2034, "message": "올바른 정렬 타입이 아닙니다."},
 
 
     TYPE_ID_WRONG:{"isSuccess": false, "code": 2041, "message": "잘못된 타입 아이디 입니다."},
@@ -91,6 +92,12 @@ module.exports = {
     UPDATE_BOARD_FAIL:{ "isSuccess": false, "code": 3024, "message":"수정 중 오류가 발생했습니다."},
     WRONG_BOARD_PATH:{ "isSuccess": false, "code": 3025, "message":"잘못된 게시글 경로입니다."},
     DELETE_BOARD_FAIL : { "isSuccess": false, "code": 3026, "message":"삭제 중 오류가 발생했습니다."},
+
+    CHECK_ITEM_NOT_EXIST : { "isSuccess": false, "code": 3027, "message":"수강 바구니에 강의가 없습니다"},
+    DELETE_ITEM_FAIL : { "isSuccess": false, "code": 3028, "message":"삭제 중 오류가 발생했습니다."},
+    ITEM_ALREADY_EXIST :{ "isSuccess": false, "code": 3029, "message":"수강바구니에 이미 강의가 있습니다."},
+    RECEIPT_NOT_EXIST :{ "isSuccess": false, "code": 3030, "message":"구매내역이 존재하지 않습니다."},
+
 
     INSERT_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3041, "message":"강의 공지 작성을 실패하였습니다."},
     UPDATE_LECTURE_NOTICE_FAIL:{ "isSuccess": false, "code": 3042, "message":"강의 공지 수정을 실패하였습니다."},
