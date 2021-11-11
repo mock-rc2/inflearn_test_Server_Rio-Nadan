@@ -47,5 +47,7 @@ module.exports = function(app){
     app.get('/inflearn/users/wishlist/items', jwtMiddleware, wishList.getWishListItem);
 
     app.delete('/inflearn/users/wishlist/items', jwtMiddleware, wishList.deleteWishListItem);
+
+    app.get('/inflearn/users/histories', jwtMiddleware, lectures.getUserHistories);
 };
 

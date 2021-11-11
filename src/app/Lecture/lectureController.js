@@ -404,3 +404,12 @@ exports.getDashboardCurriculum = async function(req,res){
     return res.send(sessionClasses);
 
 }
+
+exports.getUserHistories = async function(req, res) {
+    const token = req.verifiedToken;
+    const userId = token.userId;
+
+    const userHistories = await lectureProvider.getUserHistories(userId);
+
+    return res.send(response(baseResponse.SUCCESS("유저 기록 조회 성공"), userHistories));
+}

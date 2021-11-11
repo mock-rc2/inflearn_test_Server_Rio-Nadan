@@ -235,7 +235,7 @@ exports.selectLecturePreviewCount = async function (lectureId) {
 exports.selectLectureCategory = async function (lectureId) {
     const connection = await pool.getConnection(async (conn) => conn);
     const selectLectureTagRows = await lectureDao.selectLectureCategory(connection, lectureId);
-
+    connection.release();
     if (!selectLectureTagRows) return [];
 
     return selectLectureTagRows[0];
@@ -429,4 +429,12 @@ exports.getDashboardCurriculum = async function(lectureId,userId){
     connection.release();
 
     return response(baseResponse.SUCCESS("강의 세션 목록 조회에 성공하였습니다"),sessionRows)
+}
+
+exports.getUserHistories = async function(userId) {
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const userHistoriesResult = await lectureDao.selectUserHistories(connection, userId);
+
+    return userHistoriesResult;
 }
