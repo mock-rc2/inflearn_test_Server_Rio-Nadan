@@ -14,5 +14,12 @@ exports.selectUserWishList = async function(userId){
     const resultRows = await wishListDao.selectWishList(connection, userId);
 
     return resultRows;
+}
 
+exports.selectWishListItems = async function(wishListId){
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const resultRows = await wishListDao.selectWishListItems(connection, wishListId);
+
+    return resultRows;
 }

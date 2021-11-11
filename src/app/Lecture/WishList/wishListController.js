@@ -25,5 +25,28 @@ exports.postWishListItem = async function(req, res) {
 
     const insertResult = await wishListService.insertWishListItem(wishListId, lectureId)
 
-    res.send(insertResult);
+    return res.send(insertResult);
+}
+
+exports.getWishListItem = async function(req, res) {
+
+    const token = req.verifiedToken;
+
+    const userId = token.userId;
+
+    const lectureId = req.body.lectureId;
+
+    const wishListCheckRows = await wishListProvider.selectUserWishList(userId);
+
+    let wishListId;
+
+    if(wishListCheckRows.length < 1){
+        return res.send(errResponse(baseResponse.USER_WISH_LIST_NOT_EXIST));
+    }else{
+        wishListId = wishListCheckRows[0].WISH_LIST_ID;
+    }
+
+    const selectResult = await wishListProvider.selectWishListItems(wishListId);
+
+    return res.send(selectResult);
 }

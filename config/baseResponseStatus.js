@@ -57,6 +57,7 @@ module.exports = {
 
 
     TYPE_ID_WRONG:{"isSuccess": false, "code": 2041, "message": "잘못된 타입 아이디 입니다."},
+    USER_WISH_LIST_NOT_EXIST:{"isSuccess": false, "code": 2042, "message": "유저 위시리스트가 없습니다."},
     // Response error
     SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3001, "message":"중복된 이메일입니다." },
     SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3002, "message":"중복된 닉네임입니다." },

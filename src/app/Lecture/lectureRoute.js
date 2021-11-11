@@ -42,6 +42,8 @@ module.exports = function(app){
 
     app.get('/inflearn/courses/:lectureId/dashboard/curriculum',jwtMiddleware,lectures.getDashboardCurriculum);
 
-    app.post('/inflearn/users/wishlist/item', jwtMiddleware, wishList.postWishListItem);
+    app.post('/inflearn/users/wishlist/items', jwtMiddleware, wishList.postWishListItem);
+
+    app.get('/inflearn/users/wishlist/items', jwtMiddleware, wishList.getWishListItem)
 };
 

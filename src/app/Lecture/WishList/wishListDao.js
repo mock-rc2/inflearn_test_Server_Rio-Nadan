@@ -37,8 +37,29 @@ async function insertWishListItem(connection, wishListId, lectureId) {
 
     return resultRows;
 }
+
+async function selectWishListItems(connection, wishListId) {
+    const selectWishListQuery = `
+        SELECT LECTURES.LECTURE_ID, LECTURES.LECTURE_NAME, LECTURES.TITLE_IMAGE, LECTURES.PRICE, USERS.NICK_NAME
+        FROM WISH_LIST_ITEM AS WISH 
+            INNER JOIN LECTURES
+                ON LECTURES.LECTURE_ID = WISH.LECTURE_ID
+            INNER JOIN USERS
+                ON USERS.USER_ID = LECTURES.USER_ID
+        WHERE WISH_LIST_ID = ?;
+    `;
+
+    const [selectWishListResult] = await connection.query(
+        selectWishListQuery,
+        wishListId
+    );
+
+    return selectWishListResult;
+}
+
 module.exports = {
     insertWishList,
     selectWishList,
-    insertWishListItem
+    insertWishListItem,
+    selectWishListItems
 }
