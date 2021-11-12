@@ -93,6 +93,7 @@ async function selectLectureTag(connection,lectureId){
     return lectureTagResult;
 }
 
+
 async function filterLectureList(connection,where) {
     let query = `
     select distinct 
@@ -105,6 +106,7 @@ async function filterLectureList(connection,where) {
     inner join LECTURE_TOP_CATEGORIES LTC on LT.BIG_CATEGORY_ID = LTC.BIG_CATEGORY_ID
     inner join MIDDLE_CATEGORY_TAGS AS TAG ON LT.CATEGORY_TAG_ID = TAG.CATEGORY_TAG_ID
     where `;
+
     let lectureListQuery = query + where + ';';
 
 
@@ -661,8 +663,8 @@ where L.LECTURE_ID = ?;
 
 async function selectQuestionList(connection,lectureId) {
     const getQuestionListQuery = `
-    select 
-        L.LECTURE_ID,BOARD_TITLE,date_format(BOARDS.CREATED_AT,'%Y.%m.%d') as DATE
+    select
+        L.LECTURE_ID,BOARD_ID,BOARD_TITLE,date_format(BOARDS.CREATED_AT,'%Y.%m.%d') as DATE
     from BOARDS
 left join LECTURE_CLASSES LC on BOARDS.CLASS_ID = LC.CLASS_ID
 left join LECTURE_SESSION LS on LC.SESSION_ID = LS.SESSION_ID

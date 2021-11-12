@@ -1,10 +1,8 @@
-const jwtMiddleware = require("../../../config/jwtMiddleware");
 const lectureProvider = require("../../app/Lecture/lectureProvider");
 const lectureService = require("../../app/Lecture/lectureService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
-const requestHandler = require("../../../config/requestHandler")
-const regexEmail = require("regex-email");
+
 
 /**
  * API No.
@@ -42,7 +40,6 @@ exports.getBigLectureList = async function(req,res){
 
     if(isExist.length < 1)
         return res.send(errResponse(baseResponse.CATEGORY_NOT_EXIST));
-
 
     const lectureResult = await lectureProvider.getLectureList(bigCategoryName,tagName);
 
