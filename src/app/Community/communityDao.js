@@ -1,4 +1,4 @@
-async function selectBoardList(connection,type) {
+async function selectBoardList(connection,type,start,pageSize) {
     const selectBoardsListQuery = `
     select 
         BOARDS.BOARD_ID,BOARD_TITLE,NICK_NAME, BOARD_CONTENT,
@@ -11,12 +11,46 @@ left join LECTURE_SESSION LS on LC.SESSION_ID = LS.SESSION_ID
 left join LECTURES L on LS.LECTURE_ID = L.LECTURE_ID
 left join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
     where BOARD_TYPE = ? AND BOARDS.STATUS = 'active'
-        group by BOARDS.BOARD_ID;
+        group by BOARDS.BOARD_ID
+        limit ?,?;
     `;
+    console.log(start,pageSize);
 
-    const [resultRow] = await connection.query(selectBoardsListQuery,type);
+    const [resultRow] = await connection.query(selectBoardsListQuery,[type,start,pageSize]);
     return resultRow;
 
+}
+
+async function selectSortedBoardList(connection,type,orderBy,start,pageSize){
+    const query = `
+    select 
+        BOARDS.BOARD_ID,BOARD_TITLE,NICK_NAME, BOARD_CONTENT,
+        LECTURE_NAME,CLASS_NAME,date_format(BOARDS.UPDATED_AT,'%Y년 %m월 %d일') as DATE,
+        count(ANSWER_ID) as cnt 
+    from BOARDS
+inner join USERS U on BOARDS.USER_ID = U.USER_ID
+left join LECTURE_CLASSES LC on BOARDS.CLASS_ID = LC.CLASS_ID
+left join LECTURE_SESSION LS on LC.SESSION_ID = LS.SESSION_ID
+left join LECTURES L on LS.LECTURE_ID = L.LECTURE_ID
+left join ANSWERS A on BOARDS.BOARD_ID = A.BOARD_ID
+    where BOARD_TYPE = ? AND BOARDS.STATUS = 'active'
+        group by BOARDS.BOARD_ID
+    `;
+    let limitQuery = ' limit ' + start + ',' + pageSize + ';';
+    let selectBoardsListQuery = query + orderBy + limitQuery;
+
+    const [resultRow] = await connection.query(selectBoardsListQuery,[type,orderBy,start,pageSize]);
+
+    return resultRow;
+}
+
+async function boardListLength(connection,type) {
+    const getLengthQuery = `
+    select count(BOARD_ID) as Length from BOARDS where BOARD_TYPE = ? AND STATUS = 'active';
+    `
+
+    const [resultRow] = await connection.query(getLengthQuery,type);
+    return resultRow;
 }
 
 
@@ -120,7 +154,8 @@ async function selectBoardInfo(connection,boardId,type){
     select 
         BOARDS.BOARD_ID,BOARD_TITLE, BOARD_CONTENT,
         date_format(BOARDS.UPDATED_AT,'%Y.%m.%d') as DATE,
-        LECTURE_NAME,CLASS_NAME,count(ANSWER_ID) as cnt
+        LECTURE_NAME,L.LECTURE_ID,
+        CLASS_NAME,LC.CLASS_ID,count(ANSWER_ID) as cnt
     from BOARDS
     inner join USERS U on BOARDS.USER_ID = U.USER_ID
     left join LECTURE_CLASSES LC on BOARDS.CLASS_ID = LC.CLASS_ID
@@ -145,6 +180,8 @@ module.exports = {
     checkBoardType,
     deleteBoard,
     selectClassBoard,
-    selectBoardInfo
+    selectBoardInfo,
+    selectSortedBoardList,
+    boardListLength
 
 }

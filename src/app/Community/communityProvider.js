@@ -10,14 +10,68 @@ const lectureDao = require("../Lecture/lectureDao");
 const {query} = require("winston");
 const communityProvider = require("../Community/communityProvider");
 
-exports.getBoardList = async function(type){
+exports.getBoardList = async function(type,page,pageSize){
     const connection = await pool.getConnection(async (conn)=> conn);
 
-    const selectBoardsListResult = await communityDao.selectBoardList(connection,type);
+    let start = 0;
+    // 차트 길이를 알기 위한 임시 쿼리
+    const boardLength = await communityDao.boardListLength(connection,type);
+    if(page > Math.ceil(boardLength[0].Length/pageSize)){
+        page = Math.ceil(boardLength[0].Length/pageSize); // 마지막 페이지 이상을 넘어서면 가장 마지막 페이지를 보여주도록 설계
+    }
+    if(page<=0){
+        page = 1;
+    }
+    else{
+        start = (page-1) * pageSize;
+    }
+
+    const selectBoardsListResult = await communityDao.selectBoardList(connection,type,Number(start),Number(pageSize));
 
     connection.release();
-    return selectBoardsListResult;
+    return response(baseResponse.SUCCESS("강의 목록 조회에 성공했습니다"),selectBoardsListResult);
 
+}
+
+exports.getBoardListSort = async function(type,sortQuery,page,pageSize){
+
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    let start = 0;
+
+    const boardLength = await communityDao.boardListLength(connection,type);
+
+    if(page > Math.ceil(boardLength[0].Length/pageSize)){
+
+        page = Math.ceil(boardLength[0].Length/pageSize); // 마지막 페이지 이상을 넘어서면 가장 마지막 페이지를 보여주도록 설계
+    }
+    if(page<=0){
+        page = 1;
+    }
+    else{
+        start = (page-1) * pageSize;
+    }
+
+    let orderBy;
+    switch (sortQuery) {
+        case 'created':
+            orderBy = 'order by DATE desc';
+            break;
+
+        case 'comment':
+            orderBy = 'order by cnt desc';
+            break;
+
+        default :
+            return errResponse(baseResponse.SORT_TYPE_ERROR);
+            break;
+    }
+    console.log("start : " + start + " pageSize : " + pageSize);
+    const selectSortedBoardsListResult = await communityDao.selectSortedBoardList(connection,type,orderBy,Number(start),Number(pageSize));
+
+    connection.release();
+
+    return response(baseResponse.SUCCESS("강의 목록 조회에 성공했습니다"),selectSortedBoardsListResult);
 }
 
 exports.checkBoardExist = async function(boardId){

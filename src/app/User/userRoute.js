@@ -1,4 +1,5 @@
 const user = require('./userController');
+const payment = require('./Payment/paymentController');
 const jwtMiddleware = require('../../../config/jwtMiddleware');
 
 module.exports = function(app){
@@ -19,11 +20,17 @@ module.exports = function(app){
 
     app.get('/inflearn/users/token/issuance', user.userTokenIssuance);
 
-    // 소셜 로그인 API CORS 오류로 인한 보류
     app.get('/inflearn/oauth2/:cooperation', user.oauthLogin);
 
-    // 강의 목록 API 브런치 따서 작업하면 됌
+    app.post('/inflearn/payments/carts/:lectureId',jwtMiddleware,payment.addItem);
 
+    app.get('/inflearn/payments/carts',jwtMiddleware,payment.getCarts);
+
+    app.delete('/inflearn/payments/carts/:lectureId',jwtMiddleware,payment.deleteItems);
+
+    app.get('/inflearn/payments/receipts',jwtMiddleware,payment.getReceipt);
+
+    app.delete('/inflearn/payments/receipts/:buyId',jwtMiddleware,payment.deleteReceipt);
 
 };
 
