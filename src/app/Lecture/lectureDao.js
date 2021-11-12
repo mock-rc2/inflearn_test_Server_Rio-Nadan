@@ -718,6 +718,34 @@ async function selectUserHistories(connection, userId) {
     return selectUserHistoriesResult;
 }
 
+async function selectLectureLateASC (connection) {
+    const query = `
+        SELECT L.LECTURE_ID, L.LECTURE_NAME, L.TITLE_IMAGE, L.STAR_POINT,L.PRICE, U.NICK_NAME
+        FROM LECTURES AS L
+            INNER JOIN USERS AS U
+                ON L.USER_ID = U.USER_ID
+        ORDER BY L.CREATED_AT ASC LIMIT 5;
+    `;
+
+    const [result] = await connection.query(query);
+
+    return result
+}
+
+async function selectLecturePopularDESC (connection) {
+    const query = `
+        SELECT L.LECTURE_ID, L.LECTURE_NAME, L.TITLE_IMAGE, L.PRICE, L.STAR_POINT, U.NICK_NAME
+        FROM LECTURES AS L
+            INNER JOIN USERS AS U
+                ON L.USER_ID = U.USER_ID
+        ORDER BY L.STAR_POINT DESC LIMIT 5;
+    `;
+
+    const [result] = await connection.query(query);
+
+    return result;
+}
+
 module.exports = {
     selectUserHaveLecture,
     selectLecture,
@@ -765,6 +793,8 @@ module.exports = {
     selectProgress,
     selectQuestionList,
     selectLectureCurriculum,
-    selectUserHistories
+    selectUserHistories,
 
+    selectLectureLateASC,
+    selectLecturePopularDESC
 };

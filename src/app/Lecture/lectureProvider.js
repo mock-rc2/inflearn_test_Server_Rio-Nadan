@@ -455,3 +455,23 @@ exports.getUserHistories = async function(userId) {
 
     return userHistoriesResult;
 }
+
+exports.getLectureLateASC = async function() {
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const result = await lectureDao.selectLectureLateASC(connection);
+
+    connection.release();
+
+    return result;
+}
+
+exports.getLecturePopular = async function() {
+    const connection = await pool.getConnection(async (conn)=>conn);
+
+    const result = await lectureDao.selectLecturePopularDESC(connection);
+
+    connection.release();
+
+    return result;
+}

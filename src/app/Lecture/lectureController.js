@@ -413,3 +413,15 @@ exports.getUserHistories = async function(req, res) {
 
     return res.send(response(baseResponse.SUCCESS("유저 기록 조회 성공"), userHistories));
 }
+
+exports.getLectureLateASC = async function(req, res) {
+    const result = await lectureProvider.getLectureLateASC();
+
+    return res.send(response(baseResponse.SUCCESS("최신 강의 조회 성공"), result));
+}
+
+exports.getLecturePopularDESC = async function(req, res) {
+    const result = await lectureProvider.getLecturePopular();
+
+    return res.send(response(baseResponse.SUCCESS("인기 강의 조회 성공"), result));
+}
