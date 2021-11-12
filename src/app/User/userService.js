@@ -50,7 +50,7 @@ exports.createUser = async function (email, password) {
     }
 };
 
-/*
+
 exports.oauthCreateUser = async function(email,name){
 
     try{
@@ -69,7 +69,7 @@ exports.oauthCreateUser = async function(email,name){
         return errResponse(baseResponse.DB_ERROR);
     }
 
-}*/
+}
 
 // TODO: After 로그인 인증 방법 (JWT)
 exports.loginUser = async function (userId, password) {
@@ -285,6 +285,103 @@ exports.editPhoneNumber = async function (id, phoneNumber) {
         logger.error(`App - editUserEmail Service error\n: ${err.message}`);
         return errResponse(baseResponse.SERVER_ERROR);
     } finally {
+        connection.release();
+    }
+}
+
+exports.jwtTokenIssuance = async function(token) {
+
+    const tokenCheckRow = await userProvider.refreshTokenCheck(token);
+
+    if(tokenCheckRow.length < 1)
+        return errResponse(baseResponse.USER_TOKEN_NOT_EXISTENCE);
+
+    const userId = tokenCheckRow[0].USER_ID;
+
+    //토큰 생성 Service
+    let jwtToken = await jwt.sign(
+        {
+            userId: userId,
+            message: "login",
+        }, // 토큰의 내용(payload)
+        secret_config.jwtsecret, // 비밀키
+        {
+            expiresIn: "6h",
+            subject: "userInfo",
+        }
+    );
+    return response(baseResponse.SUCCESS("토큰 발급 성공"), {'userId': userId, 'jwt': jwtToken});
+
+}
+
+exports.createKakaoBody = async function(code) {
+    const clientId = secret_config.kakaoRestKey;
+    const redirectUri = secret_config.kakaoRedirectUri;
+    const clientSecret = secret_config.kakaoSecretKey;
+
+    const requestParams = {
+        'code' : code,
+        'grant_type' : 'authorization_code',
+        'client_id' : clientId,
+        'redirect_uri' : redirectUri,
+        'client_secret' : clientSecret
+    }
+
+    return requestParams;
+}
+
+exports.oauthSignIn = async function(email) {
+    const connection = await pool.getConnection(async (conn) => conn);
+
+    try{
+        // 이메일 여부 확인
+        const emailRows = await userProvider.emailCheck(email);
+        if (emailRows.length < 1) return errResponse(baseResponse.USER_USERID_NOT_EXIST);
+
+        // 계정 상태 확인
+        const userInfoRows = await userProvider.accountCheck(email);
+
+        if (userInfoRows[0].STATUS === "INACTIVE") {
+            return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
+        } else if (userInfoRows[0].STATUS === "DELETED") {
+            return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
+        }
+
+        //토큰 생성 Service
+        let token = await jwt.sign(
+            {
+                userId: userInfoRows[0].USER_ID,
+                message: "login",
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "6h",
+                subject: "userInfo",
+            } // 유효 기간 6시간
+        );
+
+        //토큰 생성 Service
+        let refreshToken = await jwt.sign(
+            {
+            }, // 토큰의 내용(payload)
+            secret_config.jwtsecret, // 비밀키
+            {
+                expiresIn: "30d",
+                issuer: "rio",
+            } // 유효 기간 30일
+        );
+
+        const refreshTokenInsertResult = await userDao.insertRefreshToken(connection, refreshToken, userInfoRows[0].USER_ID);
+
+        connection.release();
+
+        return response(baseResponse.SUCCESS, {'userId': userInfoRows[0].USER_IO, 'jwt': token, 'refreshToken': refreshToken});
+
+    } catch (err) {
+        await connection.rollback();
+        logger.error(`App - postSignIn Service error\n: ${err.message} \n${JSON.stringify(err)}`);
+        return errResponse(baseResponse.DB_ERROR, err);
+    }finally {
         connection.release();
     }
 }

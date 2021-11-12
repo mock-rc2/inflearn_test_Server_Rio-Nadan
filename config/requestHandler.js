@@ -1,7 +1,7 @@
 const request = require('sync-request');
 const baseResponse = require("../config/baseResponseStatus");
 
-/*exports.requestAccessToken = async function (option){
+exports.requestAccessToken = async function (option){
     try{
         const res = await request('POST','https://kauth.kakao.com/oauth/token',option);
 
@@ -11,7 +11,7 @@ const baseResponse = require("../config/baseResponseStatus");
     }catch (err) {
         return err;
     }
-};*/
+};
 
 exports.requestUserEmail = async function(option){
     try{

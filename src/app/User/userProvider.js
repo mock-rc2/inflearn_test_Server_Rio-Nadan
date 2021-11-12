@@ -71,3 +71,11 @@ exports.nickNameCheck = async function(nickName) {
   connection.release();
   return userNickNameResult;
 }
+
+exports.refreshTokenCheck = async function(token) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const userTokenResult = await userDao.selectUserToken(connection, token);
+  connection.release();
+
+  return userTokenResult;
+}

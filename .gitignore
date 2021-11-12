@@ -110,3 +110,7 @@ secret.js
 log/
 
 .idea
+
+log/*.json
+
+file/

@@ -61,9 +61,9 @@ async function selectUserPassword(connection, selectUserPasswordParams) {
 // 유저 계정 상태 체크 (jwt 생성 위해 id 값도 가져온다.)
 async function selectUserAccount(connection, email) {
   const selectUserAccountQuery = `
-        SELECT status, id
-        FROM UserInfo 
-        WHERE email = ?;`;
+        SELECT STATUS, USER_ID
+        FROM USERS 
+        WHERE EMAIL = ?;`;
   const selectUserAccountRow = await connection.query(
       selectUserAccountQuery,
       email
@@ -143,6 +143,16 @@ async function selectUserNickName(connection, nickName) {
   return resultRow;
 }
 
+async function selectUserToken(connection, token) {
+  const selectTokenQuery = `
+    SELECT USER_ID, USER_REFRESH_TOKEN
+    FROM USERS
+    WHERE USER_REFRESH_TOKEN = ?;
+  `;
+  const [selectTokenRow] = await connection.query(selectTokenQuery, token);
+  return selectTokenRow;
+}
+
 
 module.exports = {
   selectUser,
@@ -156,5 +166,6 @@ module.exports = {
   updateUserEmail,
   updateUserPhoneNumber,
   selectUserPhoneNumber,
-  selectUserNickName
+  selectUserNickName,
+  selectUserToken
 };
